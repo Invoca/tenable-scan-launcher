@@ -41,6 +41,9 @@ func setupBasedOnFlags() {
 }
 
 func getIPs() {
+	// ips := []string
 	cloud.GetGCloudIPs()
+	// ips = append(ips, ^)
 	cloud.GetAWSIPs()
+	// ips = append(ips, ^)
 }
