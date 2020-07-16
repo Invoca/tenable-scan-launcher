@@ -1,1 +1,1 @@
-module github.com/scan-launcher
+module github.com/Invoca/tenable-scan-launcher
