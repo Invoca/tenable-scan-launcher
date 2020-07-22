@@ -2,10 +2,8 @@ package cloud
 
 import (
 	"fmt"
-
 	log "github.com/sirupsen/logrus"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
@@ -24,20 +22,19 @@ func GetAWSIPs() ([]string, error) {
 }
 
 func getInstances() ([]*ec2.Reservation, error) {
+	log.Debug("-1")
+	ec2Svc := ec2.New(nil)
 
-	// Load session from shared config
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-
-	// Create new EC2 client
-	ec2Svc := ec2.New(sess)
+	log.Debug("0")
 
 	// Describe instances. We can add filter flags later if needed
 	resp, err := ec2Svc.DescribeInstances(nil)
+
+	log.Debug("1")
 	if err != nil {
 		return nil, fmt.Errorf("Error listing instances %s", err)
 	}
+	log.Debug("2")
 	log.Debug(resp.Reservations)
 	return resp.Reservations, nil
 }
@@ -55,7 +52,7 @@ func parseInstances(reservations []*ec2.Reservation) ([]string, error) {
 
 			// Status code 16 is Runnning state
 			if *inst.State.Code == 16 {
-				log.Debug("    - Instance private ip: ", *inst.PrivateIpAddress)
+				log.Debug("Instance private ip: ", *inst.PrivateIpAddress)
 				privateIps = append(privateIps, *inst.PrivateIpAddress)
 			}
 		}
