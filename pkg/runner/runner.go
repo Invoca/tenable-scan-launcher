@@ -2,6 +2,7 @@ package runner
 
 import (
 	"fmt"
+	"context"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 
@@ -11,6 +12,8 @@ import (
 
 type Runner struct {
 	ec2Svc *ec2.EC2
+	gcloud cloud.GCloud
+	awsInterface cloud.EC2Ips
 }
 
 func (r *Runner) Run() {
@@ -27,11 +30,15 @@ func (r *Runner) Run() {
 
 func (r *Runner) setup() {
 	setupBasedOnFlags()
-	//TODO: Use Environment variables instead of Shard $HOME/.aws/config file.
+	//TODO: Use Environment variables instead of $HOME/.aws/config file.
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 	r.ec2Svc = ec2.New(sess)
+	r.awsInterface = cloud.EC2Ips{}
+
+	r.gcloud = cloud.GCloud{}
+	r.gcloud.SetupGCloud(context.Background(), "development-156617")
 	tenable.SetupClient()
 }
 
@@ -49,8 +56,9 @@ func setupBasedOnFlags() {
 
 func (r *Runner) getIPs() {
 	//ips := []string
-	cloud.GetGCloudIPs()
-	// ips = append(ips, ^)
+
+	r.gcloud.GetGCloudIPs()
+
 	awsStrct := cloud.EC2Ips{}
 	err := awsStrct.GetAWSIPs(r.ec2Svc)
 	if err != nil {
