@@ -69,7 +69,7 @@ func TestGetAWSInstances(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		log.Debug("TestGetAWSInstances: %s", testCase.desc)
+		t.Logf("TEST: %s", testCase.desc)
 		testCase.setup()
 
 
