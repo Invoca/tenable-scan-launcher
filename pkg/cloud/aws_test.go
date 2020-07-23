@@ -1,6 +1,7 @@
 package cloud
 
 import (
+	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/mocks"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -20,22 +21,11 @@ func TestGetAWSIPs(t *testing.T) {
 
 	log.SetLevel(log.DebugLevel)
 
-	mockEc2 := new(mocks.MockEC2API)
-	//	mockInstances := new(mocks.MockEC2API)
+	mockEc2 := &mocks.MockEC2API{}
 
-	//sess := session.Must(session.NewSessionWithOptions(session.Options{
-	//		SharedConfigState: session.SharedConfigEnable,
-	//	}))
+	runningCode := int64(16)
+	runningState := ec2.InstanceState{Code: &runningCode}
 
-	/*
-	mockOptions := mocks.MockOptions{
-		ResettableMock:    mocks.ResettableMock{},
-		SharedConfigState: false,
-
-	}
-
-	mockSession := new(mocks.MockSessionAPI)
-	*/
 	resp := ec2.DescribeInstancesOutput{
 		Reservations: []*ec2.Reservation{
 			{
@@ -43,12 +33,15 @@ func TestGetAWSIPs(t *testing.T) {
 				Instances: []*ec2.Instance{
 					{
 						PrivateIpAddress: 	   aws.String("1.1.1.1"),
+						State: &runningState,
 					},
 					{
 						PrivateIpAddress: 	   aws.String("2.2.2.2"),
+						State: &runningState,
 					},
 					{
 						PrivateIpAddress: 	   aws.String("3.3.3.3"),
+						State: &runningState,
 					},
 				},
 			},
@@ -60,9 +53,7 @@ func TestGetAWSIPs(t *testing.T) {
 			desc: "successful ip retrieval",
 			setup: func() {
 				mockEc2.Reset()
-				mockEc2.On("New", mock.Anything).Return(mockEc2)
-				mockEc2.On("DescribeInstances", mock.AnythingOfType("*ec2.DescribeInstancesInput")).Return(&mockEc2)
-				mockEc2.On("Reservations", mock.AnythingOfType("[]*Reservation")).Return(&resp)
+				mockEc2.On("DescribeInstances", mock.AnythingOfType("*ec2.DescribeInstancesInput")).Return(&resp, nil)
 			},
 			shouldError: false,
 		},
@@ -70,60 +61,7 @@ func TestGetAWSIPs(t *testing.T) {
 			desc: "error returned by snapshot delete",
 			setup: func() {
 				mockEc2.Reset()
-				//mockEc2.On("New", mock.AnythingOfType("*EC2")).Return(mockEc2)
-				mockEc2.On("DescribeInstances", mock.AnythingOfType("*ec2.DescribeInstancesInput")).Return(resp)
-			},
-			shouldError: true,
-		},
-	}
-
-	for _, testCase := range testCases {
-		//t.Logf("TEST: %s", testCase.desc)
-		testCase.setup()
-
-		_, err := getInstances()
-
-		mockEc2.AssertExpectations(t)
-
-
-		if testCase.shouldError {
-			assert.Error(t, err)
-		} else {
-			assert.NoError(t, err)
-		}
-	}
-}
-
-/*
-type snapshotTestCast struct {
-	desc        string
-	setup       func()
-	shouldError bool
-}
-
-func TestSnapshotDelete(t *testing.T) {
-	mock := new(mocks.MockEC2API)
-
-	snapshotId := "snap-1"
-	snapshot := aws.NewSnapshot(mock, snapshotId, nil)
-
-	deleteSnapshotInput := &ec2.DeleteSnapshotInput{SnapshotId: &snapshotId}
-	deleteSnapshotOutput := &ec2.DeleteSnapshotOutput{}
-
-	testCases := []snapshotTestCast{
-		{
-			desc: "successful snapshot delete",
-			setup: func() {
-				mock.Reset()
-				mock.On("DeleteSnapshot", deleteSnapshotInput).Return(deleteSnapshotOutput, nil)
-			},
-			shouldError: false,
-		},
-		{
-			desc: "error returned by snapshot delete",
-			setup: func() {
-				mock.Reset()
-				mock.On("DeleteSnapshot", deleteSnapshotInput).Return(nil, errors.New("snapshot delete error"))
+				mockEc2.On("DescribeInstances", mock.AnythingOfType("*ec2.DescribeInstancesInput")).Return(&resp, fmt.Errorf("error"))
 			},
 			shouldError: true,
 		},
@@ -133,15 +71,19 @@ func TestSnapshotDelete(t *testing.T) {
 		t.Logf("TEST: %s", testCase.desc)
 		testCase.setup()
 
-		err := snapshot.Delete()
 
-		mock.AssertExpectations(t)
+		ec2api := EC2Ips{}
+
+		_, err := ec2api.getInstances(mockEc2)
+
+		mockEc2.AssertExpectations(t)
+
 
 		if testCase.shouldError {
 			assert.Error(t, err)
 		} else {
 			assert.NoError(t, err)
 		}
+
 	}
 }
-*/
