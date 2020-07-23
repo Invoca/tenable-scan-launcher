@@ -59,7 +59,7 @@ func TestGetAWSInstances(t *testing.T) {
 			shouldError: false,
 		},
 		{
-			desc: "error returned by snapshot delete",
+			desc: "error returned by ip retrieval",
 			setup: func() {
 				mockEc2.Reset()
 				mockEc2.On("DescribeInstances", mock.AnythingOfType("*ec2.DescribeInstancesInput")).Return(&resp, fmt.Errorf("error"))
@@ -69,7 +69,7 @@ func TestGetAWSInstances(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		t.Logf("TEST: %s", testCase.desc)
+		log.Debug("TestGetAWSInstances: %s", testCase.desc)
 		testCase.setup()
 
 
@@ -126,12 +126,12 @@ func TestParseInstances(t *testing.T) {
 			},
 		}
 	ec2api := EC2Ips{}
-	t.Logf("Instances Are passed to parseInstance")
+	log.Debug("TestParseInstances: Instances Are passed to parseInstance")
 	err := ec2api.parseInstances(resp)
 	assert.NoError(t, err)
 	assert.Equal(t, ec2api.ips, runningInstances)
 
-	t.Logf("Nothing is passed to parseInstance")
+	log.Debug("TestParseInstances: Nothing is passed to parseInstance")
 	err = ec2api.parseInstances(nil)
 	assert.Error(t, err)
 }
