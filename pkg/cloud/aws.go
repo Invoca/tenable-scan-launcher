@@ -38,12 +38,17 @@ func (m *EC2Ips) GetAWSIPs() (error) {
 
 func (m *EC2Ips) getInstances(ec2Svc ec2iface.EC2API) ([]*ec2.Reservation, error) {
 
+	if ec2Svc == nil {
+		return nil, fmt.Errorf("getInstances: Passed empty ec2iface object")
+	}
+
 	// Describe instances. We can add filter flags later if needed
 	resp, err := ec2Svc.DescribeInstances(nil)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error listing instances %s", err)
 	}
+
 	log.Debug(resp.Reservations)
 	return resp.Reservations, nil
 }

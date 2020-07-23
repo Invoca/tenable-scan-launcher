@@ -69,7 +69,7 @@ func TestGetAWSInstances(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		t.Logf("TEST: %s", testCase.desc)
+		t.Logf("TestGetAWSInstances: %s", testCase.desc)
 		testCase.setup()
 
 
@@ -86,6 +86,13 @@ func TestGetAWSInstances(t *testing.T) {
 			assert.NoError(t, err)
 		}
 	}
+
+	t.Logf("TestGetAWSInstances: pass nil object to getInstances")
+
+	ec2api := EC2Ips{}
+	_, err := ec2api.getInstances(nil)
+	assert.Error(t, err)
+
 }
 
 
