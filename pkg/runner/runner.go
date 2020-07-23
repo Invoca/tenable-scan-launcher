@@ -3,17 +3,19 @@ package runner
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/service/ec2"
+
 	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 )
 
 type Runner struct {
-	test string
+	ec2Svc *ec2.EC2
 }
 
-func Run() {
+func (r *Runner) Run() {
 	fmt.Println("Run")
-	setup()
+	r.setup()
 	tenable.LaunchScan()
 	tenable.CheckScanProgess()
 	tenable.StartExport()
@@ -22,9 +24,10 @@ func Run() {
 	fmt.Println("Run Finished")
 }
 
-func setup() {
+func (r *Runner) setup() {
 	setupBasedOnFlags()
-	getIPs()
+	r.ec2Svc = ec2.New(nil)
+	r.getIPs()
 	tenable.SetupClient()
 }
 
@@ -40,10 +43,13 @@ func setupBasedOnFlags() {
 	fmt.Println("setupBasedOnFlags")
 }
 
-func getIPs() {
-	// ips := []string
+func (r *Runner) getIPs() {
+	//ips := []string
 	cloud.GetGCloudIPs()
 	// ips = append(ips, ^)
-	cloud.GetAWSIPs()
-	// ips = append(ips, ^)
+	awsStrct := cloud.EC2Ips{}
+	err := awsStrct.GetAWSIPs()
+	if err != nil {
+		fmt.Errorf("getIPs: %s", err)
+	}
 }

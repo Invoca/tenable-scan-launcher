@@ -2,48 +2,15 @@ package mocks
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	"github.com/stretchr/testify/mock"
 )
 
 type MockEC2API struct {
+	ec2iface.EC2API
 	ResettableMock
 }
-
-
-type MockSessionAPI struct {
-	ResettableMock
-	SharedConfigEnable bool
-}
-
-func (s *MockSessionAPI) Must(sess *MockSessionAPI, err error) *MockSessionAPI{
-	if err != nil {
-		panic(err)
-	}
-
-	return sess
-}
-
-type MockOptions struct {
-	ResettableMock
-	SharedConfigState bool
-}
-
-func NewSessionWithOptions(opts MockOptions) (*MockSessionAPI, error) {
-	s := &MockSessionAPI {}
-	return s, nil
-}
-
-// session.Must(session.NewSessionWithOptions(session.Options{
-//		SharedConfigState: session.SharedConfigEnable,
-//	}))
-// 	ec2Svc := ec2.New(sess)
-// ec2Svc.DescribeInstances(nil)
-// return []*ec2.Reservation
-
-// for _, inst := range reservations[idx].Instances {
-// *inst.PrivateIpAddress
 
 func (m *MockEC2API) DescribeInstances(input *ec2.DescribeInstancesInput) (*ec2.DescribeInstancesOutput, error) {
 	fmt.Println("DescribeInstances Mock")
@@ -55,27 +22,15 @@ func (m *MockEC2API) DescribeInstances(input *ec2.DescribeInstancesInput) (*ec2.
 	}
 }
 
-
-func (m *MockEC2API) New(p client.ConfigProvider, cfgs ...*aws.Config) *ec2.EC2 {
-	fmt.Println("NEW????")
-	return &ec2.EC2{}
+// Define a mock struct to be used in your unit tests of myFunc.
+type mockEC2Client struct {
+	ec2iface.EC2API
+	resp   ec2.DescribeInstancesOutput
+	result []string
 }
 
-/*
-
-
-type okProvider struct {
-	accessKeyID     string
-	secretAccessKey string
-	sessionToken    string
-}
-
-func (p *okProvider) Retrieve() (credentials.Value, error) {
-	return credentials.Value{
-		AccessKeyID:     p.accessKeyID,
-		SecretAccessKey: p.secretAccessKey,
-		SessionToken:    p.sessionToken,
-	}, nil
+func (m *mockEC2Client) DescribeInstances(*ec2.DescribeInstancesInput) (*ec2.DescribeInstancesOutput, error) {
+	return &m.resp, nil
 }
 
 
@@ -105,19 +60,6 @@ func (f *fakeEC2DescribeInstance) DescribeInstances(input *ec2.DescribeInstances
 }
 
 
-
-
-// Define a mock struct to be used in your unit tests of myFunc.
-type mockEC2Client struct {
-	ec2iface.EC2API
-	resp   ec2.DescribeInstancesOutput
-	result []string
-}
-
-func (m *mockEC2Client) DescribeInstances(*ec2.DescribeInstancesInput) (*ec2.DescribeInstancesOutput, error) {
-	return &m.resp, nil
-}
-*/
 
 /*
 func (m *MockEC2API) DescribeVolumes(input *ec2.DescribeVolumesInput) (*ec2.DescribeVolumesOutput, error) {

@@ -2,28 +2,51 @@ package cloud
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-// GetAWSIPs
-func GetAWSIPs() ([]string, error) {
-	log.Debug("Getting AWS IPs")
-	instances, err := getInstances()
-	if err != nil {
-		return nil, fmt.Errorf("GetAWSIPs: Could  not get list of instances %s", err)
-	}
-	ips, err := parseInstances(instances)
-	if err != nil {
-		return nil, fmt.Errorf("GetAWSIPs: Could  not parse instances given %s", err)
-	}
-	return ips, nil
+
+type EC2Ips struct {
+	ips		[]string
+	api		ec2iface.EC2API
+
 }
 
-func getInstances() ([]*ec2.Reservation, error) {
-	log.Debug("-1")
-	ec2Svc := ec2.New(nil)
+/*
+type clientFactory interface {
+	build(d *Driver) Ec2Client
+}
+
+
+func (d *Driver) buildClient() Ec2Client {
+	return ec2.New(nil)
+}
+*/
+
+
+// GetAWSIPs
+func (m *EC2Ips) GetAWSIPs() (error) {
+	log.Debug("Getting AWS IPs")
+
+	if m.api == nil {
+		fmt.Errorf("GetAWSIPs: api object is nil")
+	}
+
+	instances, err := m.getInstances(m.api)
+	if err != nil {
+		return fmt.Errorf("GetAWSIPs: Could not get list of instances %s", err)
+	}
+	err = m.parseInstances(instances)
+	if err != nil {
+		return fmt.Errorf("GetAWSIPs: Could not parse instances given %s", err)
+	}
+	return nil
+}
+
+func (m *EC2Ips) getInstances(ec2Svc ec2iface.EC2API) ([]*ec2.Reservation, error) {
 
 	log.Debug("0")
 
@@ -39,11 +62,11 @@ func getInstances() ([]*ec2.Reservation, error) {
 	return resp.Reservations, nil
 }
 
-func parseInstances(reservations []*ec2.Reservation) ([]string, error) {
+func (m *EC2Ips) parseInstances(reservations []*ec2.Reservation) (error) {
 	var privateIps []string
 
 	if reservations == nil {
-		return nil, fmt.Errorf("parseInstances: Passed empty reservations object")
+		return fmt.Errorf("parseInstances: Passed empty reservations object")
 	}
 
 	for idx, res := range reservations {
@@ -57,6 +80,9 @@ func parseInstances(reservations []*ec2.Reservation) ([]string, error) {
 			}
 		}
 	}
+
 	log.Debug(privateIps)
-	return privateIps, nil
+
+	m.ips = privateIps
+	return nil
 }
