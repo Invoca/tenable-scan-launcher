@@ -17,7 +17,7 @@ type getInstanceIpsTestCast struct {
 	shouldError bool
 }
 
-func TestGetAWSIPs(t *testing.T) {
+func TestGetAWSInstances(t *testing.T) {
 
 	log.SetLevel(log.DebugLevel)
 
@@ -44,6 +44,7 @@ func TestGetAWSIPs(t *testing.T) {
 						State: &runningState,
 					},
 				},
+
 			},
 		},
 	}
@@ -84,6 +85,56 @@ func TestGetAWSIPs(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 		}
-
 	}
 }
+
+
+func TestParseInstances(t *testing.T) {
+
+	log.SetLevel(log.DebugLevel)
+
+
+	runningCode := int64(16)
+	runningState := ec2.InstanceState{Code: &runningCode}
+
+	nonRunningCode := int64(0)
+	nonRunningState := ec2.InstanceState{Code: &nonRunningCode}
+
+	runningInstances := []string{
+		"1.1.1.1",
+		"2.2.2.2",
+	}
+
+	resp := []*ec2.Reservation{
+			{
+				ReservationId: aws.String("123ABC"),
+				Instances: []*ec2.Instance{
+					{
+						PrivateIpAddress: 	   aws.String("1.1.1.1"),
+						State: &runningState,
+					},
+					{
+						PrivateIpAddress: 	   aws.String("2.2.2.2"),
+						State: &runningState,
+					},
+					{
+						PrivateIpAddress: 	   aws.String("3.3.3.3"),
+						State: &nonRunningState,
+					},
+				},
+
+			},
+		}
+	ec2api := EC2Ips{}
+	t.Logf("Instances Are passed to parseInstance")
+	err := ec2api.parseInstances(resp)
+	assert.NoError(t, err)
+	assert.Equal(t, ec2api.ips, runningInstances)
+
+	t.Logf("Nothing is passed to parseInstance")
+	err = ec2api.parseInstances(nil)
+	assert.Error(t, err)
+}
+
+
+

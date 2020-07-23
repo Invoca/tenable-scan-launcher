@@ -15,18 +15,6 @@ type EC2Ips struct {
 
 }
 
-/*
-type clientFactory interface {
-	build(d *Driver) Ec2Client
-}
-
-
-func (d *Driver) buildClient() Ec2Client {
-	return ec2.New(nil)
-}
-*/
-
-
 // GetAWSIPs
 func (m *EC2Ips) GetAWSIPs() (error) {
 	log.Debug("Getting AWS IPs")
@@ -39,10 +27,12 @@ func (m *EC2Ips) GetAWSIPs() (error) {
 	if err != nil {
 		return fmt.Errorf("GetAWSIPs: Could not get list of instances %s", err)
 	}
+
 	err = m.parseInstances(instances)
 	if err != nil {
 		return fmt.Errorf("GetAWSIPs: Could not parse instances given %s", err)
 	}
+
 	return nil
 }
 
