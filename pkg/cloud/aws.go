@@ -38,16 +38,12 @@ func (m *EC2Ips) GetAWSIPs() (error) {
 
 func (m *EC2Ips) getInstances(ec2Svc ec2iface.EC2API) ([]*ec2.Reservation, error) {
 
-	log.Debug("0")
-
 	// Describe instances. We can add filter flags later if needed
 	resp, err := ec2Svc.DescribeInstances(nil)
 
-	log.Debug("1")
 	if err != nil {
 		return nil, fmt.Errorf("Error listing instances %s", err)
 	}
-	log.Debug("2")
 	log.Debug(resp.Reservations)
 	return resp.Reservations, nil
 }
