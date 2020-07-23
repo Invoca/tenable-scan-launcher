@@ -10,20 +10,18 @@ import (
 
 
 type EC2Ips struct {
-	ips		[]string
-	api		ec2iface.EC2API
-
+	IPs		[]string
 }
 
 // GetAWSIPs
-func (m *EC2Ips) GetAWSIPs() (error) {
+func (m *EC2Ips) GetAWSIPs(ec2Svc ec2iface.EC2API) (error) {
 	log.Debug("Getting AWS IPs")
 
-	if m.api == nil {
+	if ec2Svc == nil {
 		fmt.Errorf("GetAWSIPs: api object is nil")
 	}
 
-	instances, err := m.getInstances(m.api)
+	instances, err := m.getInstances(ec2Svc)
 	if err != nil {
 		return fmt.Errorf("GetAWSIPs: Could not get list of instances %s", err)
 	}
@@ -74,6 +72,6 @@ func (m *EC2Ips) parseInstances(reservations []*ec2.Reservation) (error) {
 
 	log.Debug(privateIps)
 
-	m.ips = privateIps
+	m.IPs = privateIps
 	return nil
 }

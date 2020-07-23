@@ -136,7 +136,7 @@ func TestParseInstances(t *testing.T) {
 	log.Debug("TestParseInstances: Instances Are passed to parseInstance")
 	err := ec2api.parseInstances(resp)
 	assert.NoError(t, err)
-	assert.Equal(t, ec2api.ips, runningInstances)
+	assert.Equal(t, ec2api.IPs, runningInstances)
 
 	log.Debug("TestParseInstances: Nothing is passed to parseInstance")
 	err = ec2api.parseInstances(nil)
