@@ -8,6 +8,7 @@ import (
 
 	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
+	"google.golang.org/api/compute/v1"
 )
 
 type Runner struct {
@@ -37,8 +38,14 @@ func (r *Runner) setup() {
 	r.ec2Svc = ec2.New(sess)
 	r.awsInterface = cloud.EC2Ips{}
 
+	//TODO: Setup GCloud SDK to use json from Service Account
+	computeService, err := compute.NewService(context.Background())
+	if err != nil {
+		fmt.Errorf("setup: Error getting compute.Service object %s", err)
+	}
+
 	r.gcloud = cloud.GCloud{}
-	r.gcloud.SetupGCloud(context.Background(), "***REMOVED***")
+	r.gcloud.SetupGCloud(*computeService, "***REMOVED***")
 	tenable.SetupClient()
 }
 
@@ -57,7 +64,7 @@ func setupBasedOnFlags() {
 func (r *Runner) getIPs() {
 	//ips := []string
 
-	r.gcloud.GetGCloudIPs()
+	go r.gcloud.GetGCloudIPs()
 
 	awsStrct := cloud.EC2Ips{}
 	err := awsStrct.GetAWSIPs(r.ec2Svc)
