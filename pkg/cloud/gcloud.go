@@ -16,12 +16,13 @@ type GCloud struct {
 }
 
 
-func (g *GCloud) SetupGCloud(computeService wrapper.GCloudWrapper) {
+func (g *GCloud) SetupGCloud(computeService wrapper.GCloudWrapper) error {
 	if &computeService == nil {
-		fmt.Errorf("SetupGCloud: computeService cannot be nil")
+		return fmt.Errorf("SetupGCloud: computeService cannot be nil")
 	}
-
+	
 	g.computeService = computeService
+	return nil
 }
 
 
