@@ -100,11 +100,11 @@ func (g *gCloudWrapper) Zones() ([]string, error) {
 	regions, err := listRegions.Do()
 
 	if regions == nil {
-		fmt.Errorf("Zones: No Zones Available")
+		return nil, fmt.Errorf("Zones: No Zones Available")
 	}
 
 	if err != nil {
-		fmt.Errorf("Zones: Error Getting zones %s", err)
+		return nil, fmt.Errorf("Zones: Error Getting zones %s", err)
 	}
 
 	for _, region := range regions.Items {
@@ -116,7 +116,7 @@ func (g *gCloudWrapper) Zones() ([]string, error) {
 
 func (g *gCloudWrapper) InstancesIPsInRegion(region string) ([]string, error) {
 	if &region == nil {
-		fmt.Errorf("InstancesIPsInRegion: region cannot be nil")
+		return nil, fmt.Errorf("InstancesIPsInRegion: region cannot be nil")
 	}
 
 	var privateIps []string
@@ -127,7 +127,7 @@ func (g *gCloudWrapper) InstancesIPsInRegion(region string) ([]string, error) {
 	resList, err := listInstances.Do()
 
 	if err != nil {
-		fmt.Errorf("InstancesIPsInRegion: Error getting instances %s", err)
+		return nil, fmt.Errorf("InstancesIPsInRegion: Error getting instances %s", err)
 	}
 
 	for _, resItem := range resList.Items {
