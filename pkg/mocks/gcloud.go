@@ -13,7 +13,7 @@ type GgCloudServiceMock struct {
 }
 
 func (g *GgCloudServiceMock) Zones() ([]string, error) {
-	fmt.Println("Zones Mock")
+	fmt.Println("Zones() Mock")
 	args := g.Called(nil)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -23,7 +23,7 @@ func (g *GgCloudServiceMock) Zones() ([]string, error) {
 }
 
 func (g *GgCloudServiceMock) InstancesIPsInRegion(region string) ([]string, error) {
-	fmt.Println("InstancesIPsInRegion Mock")
+	fmt.Println("InstancesIPsInRegion() Mock")
 	args := g.Called(region)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
