@@ -58,22 +58,23 @@ func (g *GCloud) getInstancesInRegion(region string) error {
 }
 
 // GetGCloudIPs
-func (g *GCloud) GetGCloudIPs() {
+func (g *GCloud) GetGCloudIPs() error {
 	fmt.Println("Getting IPs from Google Cloud")
 
 	if &g.computeService == nil {
-		fmt.Errorf("getAllRegionsForProject: computeService cannot be nil")
+		return fmt.Errorf("getAllRegionsForProject: computeService cannot be nil")
 	}
 
 	g.getAllRegionsForProject()
 
 	if &g.regions == nil {
-		fmt.Errorf("getAllRegionsForProject: regions cannot be nil")
+		return fmt.Errorf("getAllRegionsForProject: regions cannot be nil")
 	}
 
 	for _, region := range g.regions {
 		go g.getInstancesInRegion(region)
 	}
+	return nil
 }
 
 type gCloudWrapper struct{
@@ -84,11 +85,11 @@ type gCloudWrapper struct{
 
 func NewCloudWrapper(computeService *compute.Service, project string) (*gCloudWrapper, error) {
 	if computeService == nil {
-		fmt.Errorf("NewCloudWrapper: computeService cannot be nil")
+		return nil, fmt.Errorf("NewCloudWrapper: computeService cannot be nil")
 	}
 
 	if &project == nil {
-		fmt.Errorf("NewCloudWrapper: project cannot be nil")
+		return nil, fmt.Errorf("NewCloudWrapper: project cannot be nil")
 	}
 
 	return &gCloudWrapper{computeService: computeService, project: project}, nil
