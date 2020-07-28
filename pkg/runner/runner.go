@@ -8,7 +8,6 @@ import (
 
 	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
-	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -46,7 +45,7 @@ func (r *Runner) setup() {
 	}
 
 
-	gCloudInterface, err := wrapper.NewCloudWrapper(computeService, "***REMOVED***")
+	gCloudInterface, err := cloud.NewCloudWrapper(computeService, "***REMOVED***")
 	if err != nil {
 		fmt.Errorf("setup: Error creating GCloud wrapper %s", err)
 	}
