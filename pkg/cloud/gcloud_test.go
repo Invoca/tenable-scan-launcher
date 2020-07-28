@@ -49,7 +49,7 @@ func TestGetRegionsForProject(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		t.Logf("TestGetAWSInstances: %s", testCase.desc)
+		t.Logf("TestGetRegionsForProject: %s", testCase.desc)
 		testCase.setup()
 
 		err := gcloud.getAllRegionsForProject()
@@ -64,3 +64,50 @@ func TestGetRegionsForProject(t *testing.T) {
 	}
 }
 
+func TestGetInstancesInRegion(t *testing.T) {
+
+	serviceMock := mocks.GgCloudServiceMock{}
+	gcloud := GCloud{}
+	gcloud.SetupGCloud(&serviceMock, "test")
+
+	resp := []string{
+		"1.1.1.1",
+		"2.2.2.2",
+		"3.3.3.3",
+		"4.4.4.4",
+	}
+
+	testCases := []getRegionsTestCast{
+		{
+			desc: "successful region retrieval",
+			setup: func() {
+				serviceMock.Reset()
+				serviceMock.On("InstancesIPsInRegion", mock.Anything).Return(resp, nil)
+			},
+			shouldError: false,
+		},
+		{
+			desc: "Error returned by region retrieval",
+			setup: func() {
+				serviceMock.Reset()
+				serviceMock.On("InstancesIPsInRegion", mock.Anything).Return(resp, fmt.Errorf("error"))
+			},
+			shouldError: true,
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Logf("TestGetInstancesInRegion: %s", testCase.desc)
+		testCase.setup()
+
+		err := gcloud.getInstancesInRegion("test")
+
+
+		if testCase.shouldError {
+			assert.Error(t, err)
+		} else {
+			fmt.Print(gcloud.regions)
+			assert.NoError(t, err)
+		}
+	}
+}
