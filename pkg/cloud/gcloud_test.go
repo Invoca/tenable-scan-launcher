@@ -20,7 +20,7 @@ func TestGetRegionsForProject(t *testing.T) {
 
 	serviceMock := mocks.GgCloudServiceMock{}
 	gcloud := GCloud{}
-	gcloud.SetupGCloud(&serviceMock, "test")
+	gcloud.SetupGCloud(&serviceMock)
 
 	resp := []string{
 		"Never",
@@ -68,7 +68,7 @@ func TestGetInstancesInRegion(t *testing.T) {
 
 	serviceMock := mocks.GgCloudServiceMock{}
 	gcloud := GCloud{}
-	gcloud.SetupGCloud(&serviceMock, "test")
+	gcloud.SetupGCloud(&serviceMock)
 
 	resp := []string{
 		"1.1.1.1",

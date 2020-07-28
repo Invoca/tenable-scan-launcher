@@ -52,7 +52,7 @@ func (r *Runner) setup() {
 
 
 	r.gcloud = cloud.GCloud{}
-	r.gcloud.SetupGCloud(gCloudInterface, "***REMOVED***")
+	r.gcloud.SetupGCloud(gCloudInterface)
 	tenable.SetupClient()
 }
 
