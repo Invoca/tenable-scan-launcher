@@ -34,7 +34,7 @@ func (g *GCloud) getAllRegionsForProject() error {
 	regions, err := g.computeService.Zones()
 
 	if err != nil {
-		fmt.Errorf("getAllRegionsForProject: Error Getting Zones")
+		return fmt.Errorf("getAllRegionsForProject: Error Getting Zones")
 	}
 
 	g.regions = regions
