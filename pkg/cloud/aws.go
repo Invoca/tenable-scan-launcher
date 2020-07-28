@@ -14,7 +14,7 @@ type EC2Ips struct {
 }
 
 // GetAWSIPs
-func (m *EC2Ips) GetAWSIPs(ec2Svc ec2iface.EC2API) (error) {
+func (m *EC2Ips) GetAWSIPs(ec2Svc ec2iface.EC2API) error {
 	log.Debug("Getting AWS IPs")
 
 	if ec2Svc == nil {

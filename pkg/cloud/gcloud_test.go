@@ -1,6 +1,7 @@
 package cloud
 
 import (
+	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -15,7 +16,7 @@ type getRegionsTestCast struct {
 }
 
 
-func TestgetAllRegionsForProject(t *testing.T) {
+func TestGetRegionsForProject(t *testing.T) {
 
 	serviceMock := mocks.GgCloudServiceMock{}
 	gcloud := GCloud{}
@@ -33,7 +34,7 @@ func TestgetAllRegionsForProject(t *testing.T) {
 			desc: "successful region retrieval",
 			setup: func() {
 				serviceMock.Reset()
-				serviceMock.On("DescribeInstances", mock.AnythingOfType("*ec2.DescribeInstancesInput")).Return(&resp, nil)
+				serviceMock.On("Zones", mock.Anything).Return(resp, nil)
 			},
 			shouldError: false,
 		},
@@ -41,7 +42,7 @@ func TestgetAllRegionsForProject(t *testing.T) {
 			desc: "Error returned by region retrieval",
 			setup: func() {
 				serviceMock.Reset()
-				serviceMock.On("DescribeInstances", mock.AnythingOfType("*ec2.DescribeInstancesInput")).Return(&resp, nil)
+				serviceMock.On("Zones", mock.Anything).Return(resp, fmt.Errorf("error"))
 			},
 			shouldError: true,
 		},
@@ -57,6 +58,7 @@ func TestgetAllRegionsForProject(t *testing.T) {
 		if testCase.shouldError {
 			assert.Error(t, err)
 		} else {
+			fmt.Print(gcloud.regions)
 			assert.NoError(t, err)
 		}
 	}
