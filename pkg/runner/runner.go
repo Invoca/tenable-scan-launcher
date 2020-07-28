@@ -8,6 +8,7 @@ import (
 
 	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
+	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -44,8 +45,15 @@ func (r *Runner) setup() {
 		fmt.Errorf("setup: Error getting compute.Service object %s", err)
 	}
 
+
+	gCloudInterface, err := wrapper.NewCloudWrapper(computeService, "development-156617")
+	if err != nil {
+		fmt.Errorf("setup: Error creating GCloud wrapper %s", err)
+	}
+
+
 	r.gcloud = cloud.GCloud{}
-	r.gcloud.SetupGCloud(*computeService, "development-156617")
+	r.gcloud.SetupGCloud(gCloudInterface, "development-156617")
 	tenable.SetupClient()
 }
 

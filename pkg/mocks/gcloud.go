@@ -1,19 +1,33 @@
 package mocks
+import (
+	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
+	"fmt"
+)
 
+type GCloudServiceMock interface {
+	wrapper.GCloudWrapper
+}
 
-/*
-type MockEC2API struct {
-	ec2iface.EC2API
+type GgCloudServiceMock struct {
 	ResettableMock
 }
 
-func (m *MockEC2API) DescribeInstances(input *ec2.DescribeInstancesInput) (*ec2.DescribeInstancesOutput, error) {
-	fmt.Println("DescribeInstances Mock")
-	args := m.Called(input)
+func (g *GgCloudServiceMock) Zones() ([]string, error) {
+	fmt.Println("Zones Mock")
+	args := g.Called(nil)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	} else {
-		return args.Get(0).(*ec2.DescribeInstancesOutput), args.Error(1)
+		return args.Get(0).([]string), args.Error(1)
 	}
+}
 
-*/
+func (g *GgCloudServiceMock) InstancesIPsInRegion(region string) ([]string, error) {
+	fmt.Println("InstancesIPsInRegion Mock")
+	args := g.Called(region)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	} else {
+		return args.Get(0).([]string), args.Error(1)
+	}
+}
