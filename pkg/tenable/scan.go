@@ -24,7 +24,6 @@ type Tenable struct {
 	status		*scanStatus
 }
 
-
 func SetupClient(accessKey string, secretKey string, scanID string) *Tenable {
 	t := Tenable{
 		accessKey:  accessKey,
@@ -36,12 +35,10 @@ func SetupClient(accessKey string, secretKey string, scanID string) *Tenable {
 			Pending:   false,
 			Running:   false,
 		},
-		scanUuid: "8be91047-bec6-4b9a-affc-4982763e2886",
 	}
 	return &t
 }
 
-// The same json tags will be used to encode data into JSON
 type launchScanBody struct {
 	altTargets	[]string `json:"alt_targets"`
 }
@@ -67,9 +64,12 @@ func (t *Tenable) tenableRequest(url string, method string, headers map[string]s
 		return nil, fmt.Errorf("tenableRequest: url cannot be nil")
 	} else if method == "" {
 		return nil, fmt.Errorf("tenableRequest: method cannot be nil")
-	} else if requestBody == nil {
+	}
+	if requestBody == nil {
 		log.Debug("requestBody is nil")
-	} else if headers == nil {
+	}
+
+	if headers == nil {
 		log.Debug("headers nil. Creating a new map[string]string")
 		headers = make(map[string]string)
 	}
@@ -209,9 +209,8 @@ func (t *Tenable) checkScanProgess() (string, error) {
 	fmt.Println("checkScanProgess")
 
 	url := t.tenableURL + "/scans/" + t.scanID + "/latest-status"
-	headers := make(map[string]string)
 
-	body, err := t.tenableRequest(url, "GET", headers, nil)
+	body, err := t.tenableRequest(url, "GET", nil, nil)
 	if err != nil {
 		return "", fmt.Errorf("checkScanProgess: Error making request %s", err)
 	}
