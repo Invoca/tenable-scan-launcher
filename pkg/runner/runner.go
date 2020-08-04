@@ -21,6 +21,7 @@ type runner struct {
 }
 
 func SetupRunner (cmd *cobra.Command) (*runner, error) {
+	//TODO: Make the cobra.Command parsing a separate function
 	accessKey := cmd.Flag("accessKey").Value.String()
 	secretKey := cmd.Flag("secretKey").Value.String()
 	scanID := cmd.Flag("scanID").Value.String()
@@ -34,6 +35,7 @@ func SetupRunner (cmd *cobra.Command) (*runner, error) {
 	}
 
 	r := &runner{}
+
 	//TODO: Use Environment variables instead of $HOME/.aws/config file.
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
@@ -64,14 +66,23 @@ func SetupRunner (cmd *cobra.Command) (*runner, error) {
 
 func (r *runner) Run() error {
 	log.Debug("Run")
-	//r.getIPs()
+	err := r.getIPs()
+	if err != nil {
+		return fmt.Errorf("Run: Error getting ips %s", err)
+	}
+
+	if len(r.tenable.Targets) == 0 {
+		return fmt.Errorf("Run: No targets added to scan")
+	}
+
+	// targets is just for testing to make the scan go quicker
 	var targets []string
 
 	target1 := "127.0.0.1"
 	targets = append(targets, target1)
 	r.tenable.Targets = targets
 
-	err := r.tenable.LaunchScan()
+	err = r.tenable.LaunchScan()
 	if err != nil {
 		return fmt.Errorf("Run: Error launching scan %s", err)
 	}
@@ -101,6 +112,7 @@ func (r *runner) Run() error {
 }
 
 func (r *runner) getIPs() error {
+	log.Debug("getIPs")
 	var ips []string
 
 	err := r.gcloud.GetGCloudIPs()
@@ -121,8 +133,8 @@ func (r *runner) getIPs() error {
 	}
 
 	ips = append(ips, awsSvc.IPs...)
-	// r.tenable.Targets = targets
+	r.tenable.Targets = ips
 
-	fmt.Println("\n\nALL:", ips)
+	log.Debug("\n\nALL:", ips)
 	return nil
 }

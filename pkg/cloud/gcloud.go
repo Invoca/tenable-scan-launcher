@@ -3,6 +3,7 @@ package cloud
 import (
 	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/api/compute/v1"
 	"sync"
 )
@@ -42,7 +43,7 @@ func (g *GCloud) getInstancesInRegion(region string) error {
 		fmt.Errorf("getInstancesInRegion: region cannot be nil")
 	}
 
-	fmt.Println(region)
+	log.Debug(region)
 
 	privateIps, err := g.computeService.InstancesIPsInRegion(region)
 
@@ -50,7 +51,7 @@ func (g *GCloud) getInstancesInRegion(region string) error {
 		return fmt.Errorf("getInstancesInRegion: Error Instances in zone")
 	}
 
-	fmt.Print("getInstancesInRegion: ", privateIps)
+	log.Debug("getInstancesInRegion: ", privateIps)
 
 	g.mux.Lock()
 	g.IPs = append(g.IPs, privateIps...)
@@ -60,7 +61,7 @@ func (g *GCloud) getInstancesInRegion(region string) error {
 
 // GetGCloudIPs
 func (g *GCloud) GetGCloudIPs() error {
-	fmt.Println("Getting IPs from Google Cloud")
+	log.Debug("Getting IPs from Google Cloud")
 
 	if &g.computeService == nil {
 		return fmt.Errorf("getAllRegionsForProject: computeService cannot be nil")
