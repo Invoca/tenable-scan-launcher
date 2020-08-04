@@ -31,3 +31,4 @@ func (g *GgCloudServiceMock) InstancesIPsInRegion(region string) ([]string, erro
 		return args.Get(0).([]string), args.Error(1)
 	}
 }
+
