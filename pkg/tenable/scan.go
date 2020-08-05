@@ -65,6 +65,7 @@ func (t *Tenable) tenableRequest(url string, method string, headers map[string]s
 	} else if method == "" {
 		return nil, fmt.Errorf("tenableRequest: method cannot be nil")
 	}
+
 	if requestBody == nil {
 		log.Debug("requestBody is nil")
 	}
@@ -208,6 +209,10 @@ func (t *Tenable)  WaitForScanToComplete() error {
 func (t *Tenable) checkScanProgess() (string, error) {
 	fmt.Println("checkScanProgess")
 
+	if t.scanID == "" {
+		return "", fmt.Errorf("checkScanProgess: scanID cannot be nil")
+	}
+
 	url := t.tenableURL + "/scans/" + t.scanID + "/latest-status"
 
 	body, err := t.tenableRequest(url, "GET", nil, nil)
@@ -282,9 +287,14 @@ func (t *Tenable) StartExport() error {
 
 func (t *Tenable) WaitForExport() error {
 	log.Debug("WaitForExport")
-	if t.scanUuid == "" {
-		return fmt.Errorf("WaitForExport: scanUuid cannot be nil")
+	if t.fileId == "" {
+		return fmt.Errorf("WaitForExport: fileId cannot be nil")
 	}
+
+	if t.scanID == "" {
+		return fmt.Errorf("WaitForExport: scanID cannot be nil")
+	}
+
 	for {
 		status, err := t.checkExport()
 
