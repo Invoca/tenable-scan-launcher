@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-type getRegionsTestCast struct {
+type testCase struct {
 	desc        string
 	setup       func()
 	shouldError bool
@@ -38,7 +38,7 @@ func setupTenable(t *testing.T, tenable *Tenable, requestBodies [][]byte, return
 		}
 	}))
 
-	// defer server.Close()
+	defer server.Close()
 
 	tenable.tenableURL = server.URL
 	return tenable
@@ -67,7 +67,7 @@ func TestLaunchScan(t *testing.T) {
 
 	statusPath := "/scans/" + tenable.scanID + "/launch"
 
-	testCases := []getRegionsTestCast{
+	testCases := []testCase{
 		{
 			desc: "launching a scan returns successfully",
 			setup: func() {
@@ -166,7 +166,7 @@ func TestWaitForScanToComplete(t *testing.T) {
 
 	statusPath := "/scans/" + scanID + "/latest-status"
 
-	testCases := []getRegionsTestCast{
+	testCases := []testCase{
 		{
 			desc: "scan finishes successfully",
 			setup: func() {
@@ -267,7 +267,7 @@ func TestStartExport(t *testing.T) {
 
 	statusPath := "/scans/" + scanID + "/export"
 
-	testCases := []getRegionsTestCast{
+	testCases := []testCase{
 		{
 			desc: "create export returns successfully",
 			setup: func() {
@@ -363,7 +363,7 @@ func TestWaitForExport(t *testing.T) {
 
 	statusPath := "/scans/" + scanID + "/export/" + fileId + "/status"
 
-	testCases := []getRegionsTestCast{
+	testCases := []testCase{
 		{
 			desc: "create export returns successfully",
 			setup: func() {
