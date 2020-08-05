@@ -135,7 +135,11 @@ func (t *Tenable) tenableRequest(url string, method string, headers map[string]s
 
 
 func (t *Tenable) LaunchScan() error {
-	log.Debug("LaunchScan")
+	log.Debug("Launching scan")
+
+	if t.scanID == "" {
+		return fmt.Errorf("LaunchScan: scanID cannot be nil")
+	}
 
 	url := t.tenableURL + "/scans/" + t.scanID + "/launch"
 	headers := make(map[string]string)
@@ -172,7 +176,7 @@ func (t *Tenable) LaunchScan() error {
 }
 
 func (t *Tenable)  WaitForScanToComplete() error {
-	fmt.Println("WaitForScanToComplete")
+	fmt.Println("Waiting for scan to complete")
 
 	if t.scanID == "" {
 		return fmt.Errorf("waitForScanToComplete: scanID cannot be nil")
@@ -207,7 +211,7 @@ func (t *Tenable)  WaitForScanToComplete() error {
  */
 
 func (t *Tenable) checkScanProgess() (string, error) {
-	fmt.Println("checkScanProgess")
+	fmt.Println("Checking progress of the scan")
 
 	if t.scanID == "" {
 		return "", fmt.Errorf("checkScanProgess: scanID cannot be nil")
@@ -231,7 +235,11 @@ func (t *Tenable) checkScanProgess() (string, error) {
 }
 
 func (t *Tenable) StartExport() error {
-	fmt.Println("StartExport")
+	fmt.Println("Starting Export")
+
+	if t.scanID == "" {
+		return fmt.Errorf("StartExport: scanID cannot be nil")
+	}
 
 	headers := make(map[string]string)
 	url := t.tenableURL + "/scans/" + t.scanID + "/export"
@@ -286,7 +294,7 @@ func (t *Tenable) StartExport() error {
 }
 
 func (t *Tenable) WaitForExport() error {
-	log.Debug("WaitForExport")
+	log.Debug("Waiting for export to complete")
 	if t.fileId == "" {
 		return fmt.Errorf("WaitForExport: fileId cannot be nil")
 	}
@@ -311,7 +319,15 @@ func (t *Tenable) WaitForExport() error {
 }
 
 func (t *Tenable) checkExport() (string, error) {
-	log.Debug("checkExport")
+	log.Debug("checking status of export")
+
+	if t.fileId == "" {
+		return "", fmt.Errorf("checkExport: fileId cannot be nil")
+	}
+
+	if t.scanID == "" {
+		return "", fmt.Errorf("checkExport: scanID cannot be nil")
+	}
 
 	headers := make(map[string]string)
 	url := t.tenableURL + "/scans/" + t.scanID + "/export/" + t.fileId + "/status"
@@ -340,7 +356,15 @@ func (t *Tenable) checkExport() (string, error) {
 }
 
 func (t *Tenable) DownloadExport() error {
-	log.Debug("DownloadExport")
+	log.Debug("Downloading export")
+
+	if t.fileId == "" {
+		return fmt.Errorf("DownloadExport: fileId cannot be nil")
+	}
+
+	if t.scanID == "" {
+		return fmt.Errorf("DownloadExport: scanID cannot be nil")
+	}
 
 	headers := make(map[string]string)
 	url := t.tenableURL + "/scans/" + t.scanID + "/export/" + t.fileId + "/download"
@@ -349,10 +373,13 @@ func (t *Tenable) DownloadExport() error {
 
 
 	body, err := t.tenableRequest(url, "GET", headers, nil)
+	if err != nil {
+		return fmt.Errorf("DownloadExport: Error making request %s", err)
+	}
 
 	err = ioutil.WriteFile("./temp_result.pdf", body, 0777)
 	if err != nil {
-		return fmt.Errorf("checkScanProgess: Writing to file %s", err)
+		return fmt.Errorf("DownloadExport: Writing to file %s", err)
 	}
 	log.Debug("Completed Writing to file")
 

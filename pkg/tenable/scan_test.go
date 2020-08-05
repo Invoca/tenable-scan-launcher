@@ -18,7 +18,7 @@ type testCase struct {
 	requestBodies [][]byte
 }
 
-func setupTenable(t *testing.T, tenable *Tenable, requestBodies [][]byte, returnError bool, expectedPath string) *Tenable {
+func setupTenable(t *testing.T, tenable *Tenable, requestBodies [][]byte, returnError bool, expectedPath string) (*Tenable, *httptest.Server) {
 	counter := 0
 	apiKeyFormat := "accessKey=" + tenable.accessKey + "; secretKey=" +  tenable.secretKey + ";"
 
@@ -38,10 +38,8 @@ func setupTenable(t *testing.T, tenable *Tenable, requestBodies [][]byte, return
 		}
 	}))
 
-	defer server.Close()
-
 	tenable.tenableURL = server.URL
-	return tenable
+	return tenable, server
 }
 
 
@@ -132,8 +130,7 @@ func TestLaunchScan(t *testing.T) {
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
-		tenable := setupTenable(t, &tenable, testCase.requestBodies, testCase.returnError, testCase.expectedPath)
-
+		tenable, server := setupTenable(t, &tenable, testCase.requestBodies, testCase.returnError, testCase.expectedPath)
 		err := tenable.LaunchScan()
 
 		if testCase.shouldError {
@@ -141,6 +138,7 @@ func TestLaunchScan(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 		}
+		server.Close()
 	}
 }
 
@@ -233,7 +231,7 @@ func TestWaitForScanToComplete(t *testing.T) {
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
-		tenable := setupTenable(t, &tenable, testCase.requestBodies, testCase.returnError, testCase.expectedPath)
+		tenable, server := setupTenable(t, &tenable, testCase.requestBodies, testCase.returnError, testCase.expectedPath)
 
 		err := tenable.WaitForScanToComplete()
 
@@ -242,6 +240,7 @@ func TestWaitForScanToComplete(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 		}
+		server.Close()
 	}
 }
 
@@ -332,7 +331,7 @@ func TestStartExport(t *testing.T) {
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
-		tenable := setupTenable(t, &tenable, testCase.requestBodies, testCase.returnError, testCase.expectedPath)
+		tenable, server := setupTenable(t, &tenable, testCase.requestBodies, testCase.returnError, testCase.expectedPath)
 
 		err := tenable.StartExport()
 
@@ -341,6 +340,7 @@ func TestStartExport(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 		}
+		server.Close()
 	}
 }
 
@@ -432,7 +432,7 @@ func TestWaitForExport(t *testing.T) {
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
-		tenable := setupTenable(t, &tenable, testCase.requestBodies, testCase.returnError, testCase.expectedPath)
+		tenable, server := setupTenable(t, &tenable, testCase.requestBodies, testCase.returnError, testCase.expectedPath)
 
 		err := tenable.WaitForExport()
 
@@ -441,5 +441,106 @@ func TestWaitForExport(t *testing.T) {
 		} else {
 			assert.NoError(t, err)
 		}
+		server.Close()
+	}
+}
+
+func TestDownloadExport(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+
+	accessKey := "access"
+	secretKey := "secret"
+	scanID	  := "123"
+	scanUuid  := "scanUuid"
+	fileId    := "111"
+
+	tenable := Tenable{
+		accessKey:  accessKey,
+		secretKey:  secretKey,
+		scanID:     scanID,
+		scanUuid: scanUuid,
+		fileId: fileId,
+	}
+
+	statusPath := "/scans/" + scanID + "/export/" + fileId + "/download"
+
+	testCases := []testCase{
+		{
+			desc: "create export returns successfully",
+			setup: func() {
+			},
+			shouldError: false,
+			expectedPath: statusPath,
+			requestBodies: [][]byte{
+				[]byte(`Binary Blob`),
+			},
+		},
+		{
+			desc: "create export returns empty body",
+			setup: func() {
+			},
+			shouldError: false,
+			expectedPath: statusPath,
+			requestBodies: [][]byte{
+				[]byte(``),
+			},
+		},
+		{
+			desc: "create export scanID is not set",
+			setup: func() {
+				tenable.scanID = ""
+			},
+			shouldError: true,
+			expectedPath: statusPath,
+			requestBodies: [][]byte{
+				[]byte(`Binary Blob`),
+			},
+		},
+		{
+			desc: "create export fileId is not set",
+			setup: func() {
+				tenable.scanID = scanID
+				tenable.fileId = ""
+			},
+			shouldError: true,
+			expectedPath: statusPath,
+			requestBodies: [][]byte{
+				[]byte(`Binary Blob`),
+			},
+		},
+		{
+			desc: "create export returns a non-200 code",
+			setup: func() {
+				tenable.scanID = scanID
+				tenable.fileId = fileId
+			},
+			shouldError: true,
+			returnError: true,
+			expectedPath: statusPath,
+			requestBodies: [][]byte{
+				[]byte(`Binary Blob`),
+			},
+		},
+	}
+
+	for index, testCase := range testCases {
+		log.WithFields(log.Fields{
+			"desc": testCase.desc,
+			"shouldError": testCase.shouldError,
+			"expectedPath": testCase.expectedPath,
+			"returnError": testCase.returnError,
+		}).Debug("Starting testCase " + strconv.Itoa(index))
+
+		testCase.setup()
+		tenable, server := setupTenable(t, &tenable, testCase.requestBodies, testCase.returnError, testCase.expectedPath)
+
+		err := tenable.DownloadExport()
+
+		if testCase.shouldError {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+		}
+		server.Close()
 	}
 }
