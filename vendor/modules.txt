@@ -1,4 +1,4 @@
-# cloud.google.com/go v0.45.1
+# cloud.google.com/go v0.46.3
 cloud.google.com/go/compute/metadata
 # github.com/aws/aws-sdk-go v1.33.6
 ## explicit
@@ -56,15 +56,26 @@ github.com/googleapis/gax-go/v2
 github.com/hashicorp/golang-lru/simplelru
 # github.com/hashicorp/terraform v0.12.28
 ## explicit
+# github.com/inconshreveable/mousetrap v1.0.0
+github.com/inconshreveable/mousetrap
 # github.com/jmespath/go-jmespath v0.3.0
 github.com/jmespath/go-jmespath
 # github.com/konsorten/go-windows-terminal-sequences v1.0.1
 github.com/konsorten/go-windows-terminal-sequences
+# github.com/mitchellh/go-homedir v1.1.0
+## explicit
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
 # github.com/sirupsen/logrus v1.2.0
 ## explicit
 github.com/sirupsen/logrus
+# github.com/spf13/cobra v1.0.0
+## explicit
+github.com/spf13/cobra
+# github.com/spf13/pflag v1.0.3
+github.com/spf13/pflag
+# github.com/spf13/viper v1.7.0
+## explicit
 # github.com/stretchr/objx v0.1.1
 github.com/stretchr/objx
 # github.com/stretchr/testify v1.5.1
@@ -115,14 +126,14 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# google.golang.org/api v0.9.0
+# google.golang.org/api v0.13.0
 ## explicit
 google.golang.org/api/compute/v1
-google.golang.org/api/gensupport
 google.golang.org/api/googleapi
 google.golang.org/api/googleapi/internal/uritemplates
 google.golang.org/api/googleapi/transport
 google.golang.org/api/internal
+google.golang.org/api/internal/gensupport
 google.golang.org/api/option
 google.golang.org/api/transport/http
 google.golang.org/api/transport/http/internal/propagation
@@ -137,7 +148,7 @@ google.golang.org/appengine/internal/modules
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55
+# google.golang.org/genproto v0.0.0-20191108220845-16a3f7862a1a
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.27.1
 google.golang.org/grpc
@@ -176,5 +187,5 @@ google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
-# gopkg.in/yaml.v2 v2.2.2
+# gopkg.in/yaml.v2 v2.2.4
 gopkg.in/yaml.v2

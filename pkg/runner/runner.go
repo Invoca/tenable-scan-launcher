@@ -1,15 +1,13 @@
 package runner
 
 import (
-	"fmt"
 	"context"
+	"fmt"
+	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
+	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
-
-	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
-	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -20,20 +18,26 @@ type runner struct {
 	tenable *tenable.Tenable
 }
 
-func SetupRunner (cmd *cobra.Command) (*runner, error) {
-	//TODO: Make the cobra.Command parsing a separate function
-	accessKey := cmd.Flag("accessKey").Value.String()
-	secretKey := cmd.Flag("secretKey").Value.String()
-	scanID := cmd.Flag("scanID").Value.String()
+/*
+	bodyMap["filter.0.filter"] 		= "severity"
+	bodyMap["filter.0.quality"] 	= "eq"
+	bodyMap["filter.0.value"] 		= "Critical"
+	bodyMap["filter.1.filter"] 		= "severity"
+	bodyMap["filter.1.quality"] 	= "eq"
+	bodyMap["filter.1.value"] 		= "High"
+	bodyMap["filter.2.filter"] 		= "severity"
+	bodyMap["filter.2.quality"] 	= "eq"
+	bodyMap["filter.2.value"] 		= "Medium"
+	bodyMap["filter.3.filter"] 		= "severity"
+	bodyMap["filter.3.quality"] 	= "eq"
+	bodyMap["filter.3.value"] 		= "Low"
+	bodyMap["filter.search_type"] 	= "or"
 
-	if accessKey == "" {
-		return nil, fmt.Errorf("SetupRunner: accessKey cannot be nil")
-	}else if secretKey == "" {
-		return nil, fmt.Errorf("SetupRunner: secretKey cannot be nil")
-	} else if scanID == "" {
-		return nil, fmt.Errorf("SetupRunner: scanID cannot be nil")
-	}
+	bodyMap["format"] = "pdf"
+	bodyMap["chapters"] = "vuln_hosts_summary; vuln_by_host; compliance_exec; remediations; vuln_by_plugin; compliance"
+*/
 
+func SetupRunner (tenableClient *tenable.Tenable) (*runner, error) {
 	r := &runner{}
 
 	//TODO: Use Environment variables instead of $HOME/.aws/config file.
@@ -46,19 +50,18 @@ func SetupRunner (cmd *cobra.Command) (*runner, error) {
 	//TODO: Setup GCloud SDK to use json from Service Account
 	computeService, err := compute.NewService(context.Background())
 	if err != nil {
-		return nil, fmt.Errorf("setup: Error getting compute.Service object %s", err)
+		return nil, fmt.Errorf("SetupRunner: Error getting compute.Service object %s", err)
 	}
 
 
 	gCloudInterface, err := cloud.NewCloudWrapper(computeService, "development-156617")
 	if err != nil {
-		return nil, fmt.Errorf("setup: Error creating GCloud wrapper %s", err)
+		return nil, fmt.Errorf("SetupRunner: Error creating GCloud wrapper %s", err)
 	}
 
 
 	r.gcloud = cloud.GCloud{}
 	r.gcloud.SetupGCloud(gCloudInterface)
-	tenableClient := tenable.SetupClient(accessKey,secretKey,scanID)
 
 	r.tenable = tenableClient
 	return r, nil
