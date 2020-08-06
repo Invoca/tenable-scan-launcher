@@ -12,6 +12,56 @@ import (
 	"time"
 )
 
+type Filter struct {
+	filter string
+	quality string
+	value string
+}
+
+func CreateFilter(filter string, quality string, value string) (*Filter, error) {
+	if filter == "" {
+		return nil, fmt.Errorf("CreateSeverityFilter: filter cannot be nil")
+	}
+	if quality == "" {
+		return nil, fmt.Errorf("CreateSeverityFilter: quality cannot be nil")
+	}
+	if value == "" {
+		return nil, fmt.Errorf("CreateSeverityFilter: value cannot be nil")
+	}
+
+	return &Filter{
+		filter:  filter,
+		quality: quality,
+		value:   value,
+	}, nil
+
+}
+
+type ExportSettings struct {
+	filter []*Filter
+	chapters string
+	searchType string
+	format string
+	filePath string
+}
+
+func SetupExportSettings(filters []*Filter, searchType string, format string, chapters string, filePath string) (*ExportSettings, error) {
+	es := &ExportSettings{}
+
+	// supported formats  are Nessus, HTML, PDF, CSV, or DB
+	if format == "nessus" || format == "html" || format == "pdf" || format == "csv" || format == "db" {
+		es.format = format
+	} else {
+		return nil, fmt.Errorf("SetupExportSettings: Invalid format %s", format)
+	}
+	es.searchType = searchType
+	es.filter = filters
+	es.chapters = chapters
+	es.filePath = filePath
+	return es, nil
+}
+
+
 // TODO: Find a Better Name
 type Tenable struct {
 	accessKey 	string
@@ -22,9 +72,10 @@ type Tenable struct {
 	scanUuid 	string
 	tenableURL 	string
 	status		*scanStatus
+	export 		*ExportSettings
 }
 
-func SetupClient(accessKey string, secretKey string, scanID string) *Tenable {
+func SetupClient(accessKey string, secretKey string, scanID string, export *ExportSettings) *Tenable {
 	t := Tenable{
 		accessKey:  accessKey,
 		secretKey:  secretKey,
@@ -35,6 +86,7 @@ func SetupClient(accessKey string, secretKey string, scanID string) *Tenable {
 			Pending:   false,
 			Running:   false,
 		},
+		export: export,
 	}
 	return &t
 }
@@ -241,28 +293,24 @@ func (t *Tenable) StartExport() error {
 		return fmt.Errorf("StartExport: scanID cannot be nil")
 	}
 
+	if t.export == nil {
+		return fmt.Errorf("StartExport: export cannot be nil")
+	}
+
 	headers := make(map[string]string)
 	url := t.tenableURL + "/scans/" + t.scanID + "/export"
 
-	//TODO: Create Better map than this.
 	bodyMap := make(map[string]interface{})
 
-	bodyMap["filter.0.filter"] 		= "severity"
-	bodyMap["filter.0.quality"] 	= "eq"
-	bodyMap["filter.0.value"] 		= "Critical"
-	bodyMap["filter.1.filter"] 		= "severity"
-	bodyMap["filter.1.quality"] 	= "eq"
-	bodyMap["filter.1.value"] 		= "High"
-	bodyMap["filter.2.filter"] 		= "severity"
-	bodyMap["filter.2.quality"] 	= "eq"
-	bodyMap["filter.2.value"] 		= "Medium"
-	bodyMap["filter.3.filter"] 		= "severity"
-	bodyMap["filter.3.quality"] 	= "eq"
-	bodyMap["filter.3.value"] 		= "Low"
-	bodyMap["filter.search_type"] 	= "or"
+	for index, filter := range t.export.filter {
+		bodyMap["filter." + strconv.Itoa(index) + ".filter"] = filter.filter
+		bodyMap["filter." + strconv.Itoa(index) + ".quality"] = filter.quality
+		bodyMap["filter." + strconv.Itoa(index) + ".value"] = filter.value
+	}
 
-	bodyMap["format"] = "pdf"
-	bodyMap["chapters"] = "vuln_hosts_summary; vuln_by_host; compliance_exec; remediations; vuln_by_plugin; compliance"
+	bodyMap["filter.search_type"] 	= t.export.searchType
+	bodyMap["format"] = t.export.format
+	bodyMap["chapters"] = t.export.chapters
 
 	reqBody, err := json.Marshal(bodyMap)
 	if err != nil {

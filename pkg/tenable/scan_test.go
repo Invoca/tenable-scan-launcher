@@ -262,6 +262,18 @@ func TestStartExport(t *testing.T) {
 			Running:   false,
 		},
 		scanUuid: scanUuid,
+		export: &ExportSettings{
+			filter: []*Filter{
+				{
+					filter:  "filter",
+					quality: "quality",
+					value:   "value",
+				},
+			},
+			searchType: "and",
+			format: "pdf",
+			chapters: "vuln_hosts_summary",
+		},
 	}
 
 	statusPath := "/scans/" + scanID + "/export"
