@@ -24,14 +24,9 @@ import (
 	--include_gcloud Use GCloud
 	--gcloud_json GCLoud credentials location
 	--gcloud_project GCLoud project to use
-	--gcloud_regions GCLoud regions to use
-	--all_gcloud_regions Use all regions
 
-	Use AWS
-	AWS Regions
+
 	--include_aws
-	--aws_regions=a,b,c,d
-	--all_aws_regions
 
 	--scanner_id Which Tenable Scanner to use
 
@@ -89,7 +84,7 @@ func Execute() error {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringP("log-level", "", "", "Log level (trace,debug,info,fatal,panic,warn)")
+	rootCmd.PersistentFlags().StringP("log-level", "", "", "Log level (trace,info,fatal,panic,warn, debug) default is debug")
 	rootCmd.PersistentFlags().StringP("log-type", "", "", "Log type (text,json)")
 
 	rootCmd.PersistentFlags().StringP("tenable-access-key", "a", "", "tenable access key")
@@ -98,9 +93,6 @@ func init() {
 
 
 	rootCmd.PersistentFlags().BoolP("include-gcloud", "g", false, "Include Google Cloud Instances In Report")
-	rootCmd.PersistentFlags().BoolP("all-gcloud-regions", "R", false, "Include All Google Cloud Regions available to project")
-	rootCmd.PersistentFlags().StringP("gcloud-regions", "r", "", "Specify which Google cloud regions to get instances from")
-
 	rootCmd.PersistentFlags().BoolP("include-aws", "A", false, "Include AWS Instances In Report")
 
 

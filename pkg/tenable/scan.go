@@ -425,7 +425,7 @@ func (t *Tenable) DownloadExport() error {
 		return fmt.Errorf("DownloadExport: Error making request %s", err)
 	}
 
-	err = ioutil.WriteFile("./temp_result.pdf", body, 0777)
+	err = ioutil.WriteFile(t.export.filePath, body, 0777)
 	if err != nil {
 		return fmt.Errorf("DownloadExport: Writing to file %s", err)
 	}
