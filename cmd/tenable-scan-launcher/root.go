@@ -375,8 +375,6 @@ func setupRunner(cmd *cobra.Command) (*runner.Runner, error) {
 		if err != nil {
 			return nil, fmt.Errorf("setupRunner: Error seting up GCloud %s", err)
 		}
-	} else {
-		gCloud = nil
 	}
 
 	if includeAWS {
@@ -384,8 +382,6 @@ func setupRunner(cmd *cobra.Command) (*runner.Runner, error) {
 		if err != nil {
 			return nil, fmt.Errorf("setupRunner: Error seting up GCloud %s", err)
 		}
-	} else {
-		aws = nil
 	}
 
 
