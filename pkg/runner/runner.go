@@ -1,73 +1,44 @@
 package runner
 
 import (
-	"context"
 	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	log "github.com/sirupsen/logrus"
-	"google.golang.org/api/compute/v1"
 )
 
-type runner struct {
+type Runner struct {
 	ec2Svc *ec2.EC2
 	gcloud cloud.GCloud
 	awsInterface cloud.EC2Ips
 	tenable *tenable.Tenable
+	includeGCloud bool
+	includeAWS bool
 }
 
-/*
-	bodyMap["filter.0.filter"] 		= "severity"
-	bodyMap["filter.0.quality"] 	= "eq"
-	bodyMap["filter.0.value"] 		= "Critical"
-	bodyMap["filter.1.filter"] 		= "severity"
-	bodyMap["filter.1.quality"] 	= "eq"
-	bodyMap["filter.1.value"] 		= "High"
-	bodyMap["filter.2.filter"] 		= "severity"
-	bodyMap["filter.2.quality"] 	= "eq"
-	bodyMap["filter.2.value"] 		= "Medium"
-	bodyMap["filter.3.filter"] 		= "severity"
-	bodyMap["filter.3.quality"] 	= "eq"
-	bodyMap["filter.3.value"] 		= "Low"
-	bodyMap["filter.search_type"] 	= "or"
+func SetupRunner (tenableClient *tenable.Tenable, gCloudInterface *cloud.GCloudWrapper, ec2Interface *ec2.EC2, includeGCloud bool, includeAWS bool) (*Runner, error) {
+	r := &Runner{}
 
-	bodyMap["format"] = "pdf"
-	bodyMap["chapters"] = "vuln_hosts_summary; vuln_by_host; compliance_exec; remediations; vuln_by_plugin; compliance"
-*/
+	r.includeAWS = includeAWS
+	r.includeGCloud = includeGCloud
 
-func SetupRunner (tenableClient *tenable.Tenable) (*runner, error) {
-	r := &runner{}
-
-	//TODO: Use Environment variables instead of $HOME/.aws/config file.
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	r.ec2Svc = ec2.New(sess)
-	r.awsInterface = cloud.EC2Ips{}
-
-	//TODO: Setup GCloud SDK to use json from Service Account
-	computeService, err := compute.NewService(context.Background())
-	if err != nil {
-		return nil, fmt.Errorf("SetupRunner: Error getting compute.Service object %s", err)
+	if includeAWS {
+		r.ec2Svc = ec2Interface
+		r.awsInterface = cloud.EC2Ips{}
 	}
 
 
-	gCloudInterface, err := cloud.NewCloudWrapper(computeService, "***REMOVED***")
-	if err != nil {
-		return nil, fmt.Errorf("SetupRunner: Error creating GCloud wrapper %s", err)
+	if includeGCloud {
+		r.gcloud = cloud.GCloud{}
+		r.gcloud.SetupGCloud(gCloudInterface)
 	}
-
-
-	r.gcloud = cloud.GCloud{}
-	r.gcloud.SetupGCloud(gCloudInterface)
 
 	r.tenable = tenableClient
 	return r, nil
 }
 
-func (r *runner) Run() error {
+func (r *Runner) Run() error {
 	log.Debug("Run")
 	err := r.getIPs()
 	if err != nil {
@@ -114,28 +85,32 @@ func (r *runner) Run() error {
 	return nil
 }
 
-func (r *runner) getIPs() error {
+func (r *Runner) getIPs() error {
 	log.Debug("getIPs")
 	var ips []string
+	var err error
 
-	err := r.gcloud.GetGCloudIPs()
-	if err != nil {
-		return fmt.Errorf("getIPs: Error fetching GCloud IPs %s", err)
+	if r.includeGCloud {
+		err = r.gcloud.GetGCloudIPs()
+		if err != nil {
+			return fmt.Errorf("getIPs: Error fetching GCloud IPs %s", err)
+		}
+		if len(r.gcloud.IPs) == 0 {
+			log.Debug("No GCloud IPs found")
+		}
+		ips = append(ips, r.gcloud.IPs...)
 	}
 
-	if len(r.gcloud.IPs) == 0 {
-		log.Debug("No GCloud IPs found")
+	if r.includeAWS {
+		awsSvc := cloud.EC2Ips{}
+		err = awsSvc.GetAWSIPs(r.ec2Svc)
+		if err != nil {
+			return fmt.Errorf("getIPs: Error fetching AWS IPs %s", err)
+		}
+
+		ips = append(ips, awsSvc.IPs...)
 	}
 
-	ips = append(ips, r.gcloud.IPs...)
-
-	awsSvc := cloud.EC2Ips{}
-	err = awsSvc.GetAWSIPs(r.ec2Svc)
-	if err != nil {
-		return fmt.Errorf("getIPs: Error fetching AWS IPs %s", err)
-	}
-
-	ips = append(ips, awsSvc.IPs...)
 	r.tenable.Targets = ips
 
 	log.Debug("\n\nALL:", ips)
