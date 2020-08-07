@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
 	"github.com/Invoca/tenable-scan-launcher/pkg/runner"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -61,11 +64,7 @@ instances given based on the scanner id. It is also able to export the scans and
 			return setupLogging(cmd)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			tenableClient, err := setupTenable(cmd)
-			if err != nil {
-				return fmt.Errorf("RunE: Error seting up tenableClient %s", err)
-			}
-			runner, err := runner.SetupRunner(tenableClient)
+			runner, err := setupRunner(cmd)
 			if err != nil {
 				return fmt.Errorf("RunE: Error seting up runner %s", err)
 			}
@@ -93,10 +92,13 @@ func init() {
 
 
 	rootCmd.PersistentFlags().BoolP("include-gcloud", "g", false, "Include Google Cloud Instances In Report")
+	rootCmd.PersistentFlags().StringP("gcloud-service-account-path", "", "", "Path of service account token. Uses default if not specified")
+	rootCmd.PersistentFlags().StringP("gcloud-project", "p", "", "GCloud project to list instances from")
+
 	rootCmd.PersistentFlags().BoolP("include-aws", "A", false, "Include AWS Instances In Report")
 
 
-	rootCmd.PersistentFlags().BoolP("generate-report", "", false, "Generate A report after the scan is complete")
+	rootCmd.PersistentFlags().BoolP("generate-report", "R", false, "Generate A report after the scan is complete")
 	rootCmd.PersistentFlags().BoolP("low-severity", "L", false, "Add Low Severity To Report")
 	rootCmd.PersistentFlags().BoolP("medium-severity", "M", false, "Add Medium Severity To Report")
 	rootCmd.PersistentFlags().BoolP("high-severity", "H", false, "Add High Severity To Report")
@@ -317,4 +319,79 @@ func setupTenable(cmd *cobra.Command) (*tenable.Tenable, error) {
 
 	tenableClient := tenable.SetupClient(accessKey,secretKey,scanID, tenableExportSettings)
 	return tenableClient, nil
+}
+
+// CreateGCloudInterface
+
+func setupGCloud(cmd *cobra.Command) (*cloud.GCloudWrapper, error) {
+	serviceAccountPath, err := cmd.Flags().GetString("gcloud-service-account-path")
+	if err != nil {
+		return nil, fmt.Errorf("setupGCloud: error getting flag gcloud-service-account-path")
+	}
+
+	gcloudProject, err := cmd.Flags().GetString("gcloud-project")
+	if err != nil {
+		return nil, fmt.Errorf("setupGCloud: error getting flag tenable-secret-key")
+	}
+	gCloudWrapper, err := cloud.CreateGCloudInterface(gcloudProject, serviceAccountPath)
+	if err != nil {
+		return nil, fmt.Errorf("setupGCloud: error creating GCloud Interface")
+	}
+	return gCloudWrapper, nil
+}
+
+func setupAWS() (*ec2.EC2, error) {
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+	if sess == nil {
+		return nil, fmt.Errorf("setupAWS: Error creating session object")
+	}
+	return ec2.New(sess), nil
+}
+
+
+func setupRunner(cmd *cobra.Command) (*runner.Runner, error) {
+	var gCloud *cloud.GCloudWrapper
+	var aws *ec2.EC2
+
+	includeGCloud, err := cmd.Flags().GetBool("include-gcloud")
+	if err != nil {
+		return nil, fmt.Errorf("setupRunner: error getting flag include-gcloud")
+	}
+
+	includeAWS, err := cmd.Flags().GetBool("include-aws")
+	if err != nil {
+		return nil, fmt.Errorf("setupRunner: error getting flag include-aws")
+	}
+
+	tenableClient, err := setupTenable(cmd)
+	if err != nil {
+		return nil, fmt.Errorf("setupRunner: Error seting up tenableClient %s", err)
+	}
+
+	if includeGCloud {
+		gCloud, err = setupGCloud(cmd)
+		if err != nil {
+			return nil, fmt.Errorf("setupRunner: Error seting up GCloud %s", err)
+		}
+	} else {
+		gCloud = nil
+	}
+
+	if includeAWS {
+		aws, err = setupAWS()
+		if err != nil {
+			return nil, fmt.Errorf("setupRunner: Error seting up GCloud %s", err)
+		}
+	} else {
+		aws = nil
+	}
+
+
+	runner, err := runner.SetupRunner(tenableClient, gCloud, aws, includeGCloud, includeAWS)
+	if err != nil {
+		return nil, fmt.Errorf("setupRunner: Error seting up runner %s", err)
+	}
+	return runner, nil
 }
