@@ -2,11 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
+	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	"github.com/Invoca/tenable-scan-launcher/pkg/runner"
-	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -64,10 +61,12 @@ instances given based on the scanner id. It is also able to export the scans and
 			return setupLogging(cmd)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			log.Debug("Setting up runner")
 			runner, err := setupRunner(cmd)
 			if err != nil {
 				return fmt.Errorf("RunE: Error seting up runner %s", err)
 			}
+			log.Debug("setup completed. Running command")
 			err = runner.Run()
 			if err != nil {
 				return fmt.Errorf("RunE: Error running runner %s", err)
@@ -149,99 +148,55 @@ func setupLogging(cmd *cobra.Command) error {
 	return nil
 }
 
-func setupSeverityFilter(low bool, medium bool, high bool, critical bool) ([]*tenable.Filter, error) {
-	if (low || medium || high || critical) == false {
-		return nil, fmt.Errorf("setupSeverityFilter: Cannot generate a report without specifiying severity filters")
-	}
-
-	var filters []*tenable.Filter
-	filterName := "severity"
-	filterQuality := "eq"
-
-	if low {
-		newFilter, err := tenable.CreateFilter(filterName, filterQuality, "Low")
-		if err != nil {
-			return nil, fmt.Errorf("setupSeverityFilter: Error Creating Low Severity Filter")
-		}
-
-		filters = append(filters, newFilter)
-	}
-	if medium {
-		newFilter, err := tenable.CreateFilter(filterName, filterQuality, "Medium")
-		if err != nil {
-			return nil, fmt.Errorf("setupSeverityFilter: Error Creating Medium Severity Filter")
-		}
-
-		filters = append(filters, newFilter)
-	}
-	if high {
-		newFilter, err := tenable.CreateFilter(filterName, filterQuality, "High")
-		if err != nil {
-			return nil, fmt.Errorf("setupSeverityFilter: Error Creating High Severity Filter")
-		}
-
-		filters = append(filters, newFilter)
-	}
-	if critical {
-		newFilter, err := tenable.CreateFilter(filterName, filterQuality, "Critical")
-		if err != nil {
-			return nil, fmt.Errorf("setupSeverityFilter: Error Creating Critical Severity Filter")
-		}
-
-		filters = append(filters, newFilter)
-	}
-	return filters, nil
-}
-
-func setupTenableExport(cmd *cobra.Command) (*tenable.ExportSettings, error) {
+func setupTenableExport(cmd *cobra.Command, tenableConfig *config.TenableConfig) (error) {
 	lowSeverity, err := cmd.Flags().GetBool("low-severity")
 	if err != nil {
-		return nil, fmt.Errorf("setupTenableExport: error getting flag low-severity")
+		return fmt.Errorf("setupTenableExport: error getting flag low-severity")
 	}
 
 	mediumSeverity, err := cmd.Flags().GetBool("medium-severity")
 	if err != nil {
-		return nil, fmt.Errorf("setupTenableExport: error getting flag medium-severity")
+		return fmt.Errorf("setupTenableExport: error getting flag medium-severity")
 	}
 
 	highSeverity, err := cmd.Flags().GetBool("high-severity")
 	if err != nil {
-		return nil, fmt.Errorf("setupTenableExport: error getting flag high-severity")
+		return fmt.Errorf("setupTenableExport: error getting flag high-severity")
 	}
 
 	criticalSeverity, err := cmd.Flags().GetBool("critical-severity")
 	if err != nil {
-		return nil, fmt.Errorf("setupTenableExport: error getting flag critical-severity")
+		return fmt.Errorf("setupTenableExport: error getting flag critical-severity")
 	}
 
 	fullReport, err := cmd.Flags().GetBool("full-report")
 	if err != nil {
-		return nil, fmt.Errorf("setupTenableExport: error getting flag full-report")
+		return fmt.Errorf("setupTenableExport: error getting flag full-report")
 	}
 
 	summaryReport, err  := cmd.Flags().GetBool("summary-report")
 	if err != nil {
-		return nil, fmt.Errorf("setupTenableExport: error getting flag summary-report")
+		return fmt.Errorf("setupTenableExport: error getting flag summary-report")
 	}
 
 	searchType, err := cmd.Flags().GetString("filter-search-type")
 	if err != nil {
-		return nil, fmt.Errorf("setupTenableExport: error getting flag filter-search-type")
+		return fmt.Errorf("setupTenableExport: error getting flag filter-search-type")
 	}
 
 	format, err := cmd.Flags().GetString("report-format")
 	if err != nil {
-		return nil, fmt.Errorf("setupTenableExport: error getting flag report-format")
+		return fmt.Errorf("setupTenableExport: error getting flag report-format")
 	}
 
 	chapters, err  := cmd.Flags().GetString("report-chapters")
 	if err != nil {
-		return nil, fmt.Errorf("setupTenableExport: error getting flag report-chapters")
+		return fmt.Errorf("setupTenableExport: error getting flag report-chapters")
 	}
 
 	filePath, err  := cmd.Flags().GetString("report-file-location")
 	if err != nil {
-		return nil, fmt.Errorf("setupTenableExport: error getting flag report-file-location")
+		return fmt.Errorf("setupTenableExport: error getting flag report-file-location")
 	}
 
 	if summaryReport {
@@ -253,30 +208,35 @@ func setupTenableExport(cmd *cobra.Command) (*tenable.ExportSettings, error) {
 	}
 
 	if searchType == "" {
-		return nil, fmt.Errorf("setupTenable: filter-search-type cannot be nil")
+		return fmt.Errorf("setupTenable: filter-search-type cannot be nil")
 	}
 	if format == "" {
-		return nil, fmt.Errorf("setupTenable: format cannot be nil")
+		return fmt.Errorf("setupTenable: format cannot be nil")
 	}
 	if chapters == "" {
-		return nil, fmt.Errorf("setupTenable: chapters cannot be nil")
+		return fmt.Errorf("setupTenable: chapters cannot be nil")
 	}
 	if filePath == "" {
-		return nil, fmt.Errorf("setupTenable: filePath cannot be nil")
+		return fmt.Errorf("setupTenable: filePath cannot be nil")
 	}
 
-	filters, err := setupSeverityFilter(lowSeverity, mediumSeverity, highSeverity, criticalSeverity)
-	if err != nil {
-		return nil, fmt.Errorf("setup: Error setting up export filterst %s", err)
-	}
+	tenableConfig.LowSeverity = lowSeverity
+	tenableConfig.MediumSeverity = mediumSeverity
+	tenableConfig.HighSeverity = highSeverity
+	tenableConfig.CriticalSeverity = criticalSeverity
+	tenableConfig.SearchType = searchType
+	tenableConfig.Format = format
+	tenableConfig.Chapters = chapters
+	tenableConfig.FilePath = filePath
 
-	return tenable.SetupExportSettings(filters, searchType, format, chapters, filePath)
+	return nil
 
 }
 
-func setupTenable(cmd *cobra.Command) (*tenable.Tenable, error) {
-	var tenableExportSettings *tenable.ExportSettings
+func setupTenable(cmd *cobra.Command) (*config.TenableConfig, error) {
 	var err error
+
+	tenableConfig := new(config.TenableConfig)
 
 	accessKey, err := cmd.Flags().GetString("tenable-access-key")
 	if err != nil {
@@ -308,22 +268,23 @@ func setupTenable(cmd *cobra.Command) (*tenable.Tenable, error) {
 		return nil, fmt.Errorf("setupTenable: scanID cannot be nil")
 	}
 
+	log.Debug("setupTenableExport")
 	if generateReport {
-		tenableExportSettings, err = setupTenableExport(cmd)
+		err = setupTenableExport(cmd, tenableConfig)
 		if err != nil {
-			return nil, fmt.Errorf("setupTenable: Error creating Tenable Export Object %s", err)
+			return nil, fmt.Errorf("setupTenable: Error creating Tenable Export Settings %s", err)
 		}
-	} else {
-		tenableExportSettings = &tenable.ExportSettings{}
 	}
 
-	tenableClient := tenable.SetupClient(accessKey,secretKey,scanID, tenableExportSettings)
-	return tenableClient, nil
+	tenableConfig.AccessKey = accessKey
+	tenableConfig.SecretKey = secretKey
+	tenableConfig.ScanID = scanID
+	tenableConfig.GenerateReport = generateReport
+
+	return tenableConfig, nil
 }
 
-// CreateGCloudInterface
-
-func setupGCloud(cmd *cobra.Command) (*cloud.GCloudWrapper, error) {
+func setupGCloud(cmd *cobra.Command) (*config.GCloudConfig, error) {
 	serviceAccountPath, err := cmd.Flags().GetString("gcloud-service-account-path")
 	if err != nil {
 		return nil, fmt.Errorf("setupGCloud: error getting flag gcloud-service-account-path")
@@ -333,27 +294,17 @@ func setupGCloud(cmd *cobra.Command) (*cloud.GCloudWrapper, error) {
 	if err != nil {
 		return nil, fmt.Errorf("setupGCloud: error getting flag tenable-secret-key")
 	}
-	gCloudWrapper, err := cloud.CreateGCloudInterface(gcloudProject, serviceAccountPath)
-	if err != nil {
-		return nil, fmt.Errorf("setupGCloud: error creating GCloud Interface")
-	}
-	return gCloudWrapper, nil
-}
 
-func setupAWS() (*ec2.EC2, error) {
-	sess := session.Must(session.NewSessionWithOptions(session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	if sess == nil {
-		return nil, fmt.Errorf("setupAWS: Error creating session object")
+	gcloudConfig := &config.GCloudConfig{
+		ServiceAccountPath: serviceAccountPath,
+		ProjectName: gcloudProject,
 	}
-	return ec2.New(sess), nil
-}
 
+	return gcloudConfig, nil
+}
 
 func setupRunner(cmd *cobra.Command) (*runner.Runner, error) {
-	var gCloud *cloud.GCloudWrapper
-	var aws *ec2.EC2
+	runnerConfig := new(config.RunnerConfig)
 
 	includeGCloud, err := cmd.Flags().GetBool("include-gcloud")
 	if err != nil {
@@ -365,29 +316,30 @@ func setupRunner(cmd *cobra.Command) (*runner.Runner, error) {
 		return nil, fmt.Errorf("setupRunner: error getting flag include-aws")
 	}
 
-	tenableClient, err := setupTenable(cmd)
+	runnerConfig.IncludeAWS = includeAWS
+	runnerConfig.IncludeGCloud = includeGCloud
+
+	log.Debug("Setting up Tenable Config")
+	tenableConfig, err := setupTenable(cmd)
 	if err != nil {
 		return nil, fmt.Errorf("setupRunner: Error seting up tenableClient %s", err)
 	}
 
+	runnerConfig.TenableConfig = tenableConfig
+
 	if includeGCloud {
-		gCloud, err = setupGCloud(cmd)
+		log.Debug("Setting up GCloud Config")
+		gCloudConfig, err := setupGCloud(cmd)
 		if err != nil {
 			return nil, fmt.Errorf("setupRunner: Error seting up GCloud %s", err)
 		}
+		runnerConfig.GCloudConfig = gCloudConfig
 	}
 
-	if includeAWS {
-		aws, err = setupAWS()
-		if err != nil {
-			return nil, fmt.Errorf("setupRunner: Error seting up GCloud %s", err)
-		}
-	}
-
-
-	runner, err := runner.SetupRunner(tenableClient, gCloud, aws, includeGCloud, includeAWS)
+	runner, err := runner.SetupRunner(runnerConfig)
 	if err != nil {
 		return nil, fmt.Errorf("setupRunner: Error seting up runner %s", err)
 	}
+
 	return runner, nil
 }
