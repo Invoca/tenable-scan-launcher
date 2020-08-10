@@ -5,13 +5,12 @@ import (
 	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
-	"github.com/aws/aws-sdk-go/service/ec2"
 	log "github.com/sirupsen/logrus"
 )
 
 type Runner struct {
-	ec2Svc *ec2.EC2
-	gcloud cloud.GCloud
+	ec2Svc *cloud.AWSEc2
+	gcloud *cloud.GCloud
 	tenable *tenable.Tenable
 	includeGCloud bool
 	includeAWS bool
@@ -34,7 +33,7 @@ func SetupRunner (config *config.RunnerConfig) (*Runner, error) {
 
 
 	if r.includeGCloud {
-		r.gcloud = cloud.GCloud{}
+		r.gcloud = &cloud.GCloud{}
 		gcloudInterface, err := cloud.CreateGCloudInterface(config.GCloudConfig.ProjectName, config.GCloudConfig.ServiceAccountPath)
 		if err != nil {
 			return nil, fmt.Errorf("SetupRunner: Error creating GCloudInterface")
@@ -107,7 +106,7 @@ func (r *Runner) Run() error {
 
 func (r *Runner) getIPs() error {
 	log.Debug("getIPs")
-	var ips []string
+	var  ips []string
 	var err error
 
 	if r.includeGCloud {
@@ -122,13 +121,9 @@ func (r *Runner) getIPs() error {
 	}
 
 	if r.includeAWS {
-		awsSvc := cloud.EC2Ips{}
-		err = awsSvc.GetAWSIPs(r.ec2Svc)
-		if err != nil {
-			return fmt.Errorf("getIPs: Error fetching AWS IPs %s", err)
-		}
+		err = r.ec2Svc.GetAWSIPs(r.ec2Svc.Ec2svc)
 
-		ips = append(ips, awsSvc.IPs...)
+		ips = append(ips, r.ec2Svc.IPs...)
 	}
 
 	r.tenable.Targets = ips
