@@ -73,7 +73,7 @@ func TestGetAWSInstances(t *testing.T) {
 		testCase.setup()
 
 
-		ec2api := EC2Ips{}
+		ec2api := AWSEc2{}
 
 		_, err := ec2api.getInstances(mockEc2)
 
@@ -89,7 +89,7 @@ func TestGetAWSInstances(t *testing.T) {
 
 	t.Logf("TestGetAWSInstances: pass nil object to getInstances")
 
-	ec2api := EC2Ips{}
+	ec2api := AWSEc2{}
 	_, err := ec2api.getInstances(nil)
 	assert.Error(t, err)
 
@@ -132,7 +132,7 @@ func TestParseInstances(t *testing.T) {
 
 			},
 		}
-	ec2api := EC2Ips{}
+	ec2api := AWSEc2{}
 	log.Debug("TestParseInstances: Instances Are passed to parseInstance")
 	err := ec2api.parseInstances(resp)
 	assert.NoError(t, err)

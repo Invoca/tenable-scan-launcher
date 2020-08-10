@@ -10,22 +10,29 @@ import (
 )
 
 
-type EC2Ips struct {
+type AWSEc2 struct {
 	IPs		[]string
+	Ec2svc ec2iface.EC2API
 }
 
-func SetupAWS() (*ec2.EC2, error) {
+func SetupAWS() (*AWSEc2, error) {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 	if sess == nil {
 		return nil, fmt.Errorf("setupAWS: Error creating session object")
 	}
-	return ec2.New(sess), nil
+	
+	awsStruct := &AWSEc2{
+		IPs:    *new([]string),
+		Ec2svc: ec2.New(sess),
+	}
+
+	return awsStruct, nil
 }
 
 // GetAWSIPs
-func (m *EC2Ips) GetAWSIPs(ec2Svc ec2iface.EC2API) error {
+func (m *AWSEc2) GetAWSIPs(ec2Svc ec2iface.EC2API) error {
 	log.Debug("Getting AWS IPs")
 
 	if ec2Svc == nil {
@@ -45,7 +52,7 @@ func (m *EC2Ips) GetAWSIPs(ec2Svc ec2iface.EC2API) error {
 	return nil
 }
 
-func (m *EC2Ips) getInstances(ec2Svc ec2iface.EC2API) ([]*ec2.Reservation, error) {
+func (m *AWSEc2) getInstances(ec2Svc ec2iface.EC2API) ([]*ec2.Reservation, error) {
 
 	if ec2Svc == nil {
 		return nil, fmt.Errorf("getInstances: Passed empty ec2iface object")
@@ -62,7 +69,7 @@ func (m *EC2Ips) getInstances(ec2Svc ec2iface.EC2API) ([]*ec2.Reservation, error
 	return resp.Reservations, nil
 }
 
-func (m *EC2Ips) parseInstances(reservations []*ec2.Reservation) (error) {
+func (m *AWSEc2) parseInstances(reservations []*ec2.Reservation) error {
 	var privateIps []string
 
 	if reservations == nil {
