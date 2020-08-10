@@ -1,7 +1,8 @@
-package cloud
+package aws
 
 import (
 	"fmt"
+	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	log "github.com/sirupsen/logrus"
@@ -15,31 +16,35 @@ type AWSEc2 struct {
 	Ec2svc ec2iface.EC2API
 }
 
-func SetupAWS() (*AWSEc2, error) {
+func (m *AWSEc2) FetchIPs() []string {
+	return m.IPs
+}
+
+func (m *AWSEc2)  Setup(config *config.BaseConfig) error {
+	if config.IncludeAWS == false {
+		return fmt.Errorf("Setup: AWS is not supposed to be included")
+	}
+
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
 	if sess == nil {
-		return nil, fmt.Errorf("setupAWS: Error creating session object")
+		return fmt.Errorf("setupAWS: Error creating session object")
 	}
-	
-	awsStruct := &AWSEc2{
-		IPs:    *new([]string),
-		Ec2svc: ec2.New(sess),
-	}
-
-	return awsStruct, nil
+	m.IPs = *new([]string)
+	m.Ec2svc = ec2.New(sess)
+	return nil
 }
 
 // GetAWSIPs
-func (m *AWSEc2) GetAWSIPs(ec2Svc ec2iface.EC2API) error {
+func (m *AWSEc2) RetrieveIPs() error {
 	log.Debug("Getting AWS IPs")
 
-	if ec2Svc == nil {
-		fmt.Errorf("GetAWSIPs: api object is nil")
+	if m.Ec2svc == nil {
+		fmt.Errorf("GetAWSIPs: Ec2svc object is nil")
 	}
 
-	instances, err := m.getInstances(ec2Svc)
+	instances, err := m.getInstances(m.Ec2svc)
 	if err != nil {
 		return fmt.Errorf("GetAWSIPs: Could not get list of instances %s", err)
 	}

@@ -20,7 +20,7 @@ type GCloudConfig struct {
 	ProjectName string
 }
 
-type RunnerConfig struct {
+type BaseConfig struct {
 	IncludeAWS bool
 	IncludeGCloud bool
 	HighSeverity bool

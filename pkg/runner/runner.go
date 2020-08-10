@@ -2,29 +2,32 @@ package runner
 
 import (
 	"fmt"
-	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
+	"github.com/Invoca/tenable-scan-launcher/pkg/aws"
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
+	"github.com/Invoca/tenable-scan-launcher/pkg/gcloud"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
+	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
 	log "github.com/sirupsen/logrus"
 )
 
 type Runner struct {
-	ec2Svc *cloud.AWSEc2
-	gcloud *cloud.GCloud
+	ec2Svc wrapper.CloudWrapper
+	gcloud wrapper.CloudWrapper
 	tenable *tenable.Tenable
 	includeGCloud bool
 	includeAWS bool
 	generateReport bool
 }
 
-func SetupRunner (config *config.RunnerConfig) (*Runner, error) {
+func SetupRunner(config *config.BaseConfig) (*Runner, error) {
 	r := &Runner{}
 
 	r.includeAWS = config.IncludeAWS
 	r.includeGCloud = config.IncludeGCloud
 
 	if r.includeAWS {
-		ec2Svc, err := cloud.SetupAWS()
+		ec2Svc := &aws.AWSEc2{}
+		err := ec2Svc.Setup(config)
 		if err != nil {
 			return nil, fmt.Errorf("SetupRunner: Error setting up AWS")
 		}
@@ -33,13 +36,8 @@ func SetupRunner (config *config.RunnerConfig) (*Runner, error) {
 
 
 	if r.includeGCloud {
-		r.gcloud = &cloud.GCloud{}
-		gcloudInterface, err := cloud.CreateGCloudInterface(config.GCloudConfig.ProjectName, config.GCloudConfig.ServiceAccountPath)
-		if err != nil {
-			return nil, fmt.Errorf("SetupRunner: Error creating GCloudInterface")
-		}
-
-		err = r.gcloud.SetupGCloud(gcloudInterface)
+		r.gcloud = &gcloud.GCloud{}
+		err := r.gcloud.Setup(config)
 		if err != nil {
 			return nil, fmt.Errorf("SetupRunner: Error setting up GCloud")
 		}
@@ -110,20 +108,28 @@ func (r *Runner) getIPs() error {
 	var err error
 
 	if r.includeGCloud {
-		err = r.gcloud.GetGCloudIPs()
+		err = r.gcloud.RetrieveIPs()
 		if err != nil {
-			return fmt.Errorf("getIPs: Error fetching GCloud IPs %s", err)
+			return fmt.Errorf("getIPs: Error retrieving GCloud IPs %s", err)
 		}
-		if len(r.gcloud.IPs) == 0 {
+		gcloudIPs := r.gcloud.FetchIPs()
+		if len(gcloudIPs) == 0 {
 			log.Debug("No GCloud IPs found")
 		}
-		ips = append(ips, r.gcloud.IPs...)
+		ips = append(ips, gcloudIPs...)
 	}
 
 	if r.includeAWS {
-		err = r.ec2Svc.GetAWSIPs(r.ec2Svc.Ec2svc)
+		err = r.ec2Svc.RetrieveIPs()
+		if err != nil {
+			return fmt.Errorf("getIPs: Error retrieving AWS IPs %s", err)
+		}
+		awsIPs := r.ec2Svc.FetchIPs()
+		if len(awsIPs) == 0 {
+			log.Debug("No GCloud IPs found")
+		}
 
-		ips = append(ips, r.ec2Svc.IPs...)
+		ips = append(ips, awsIPs...)
 	}
 
 	r.tenable.Targets = ips

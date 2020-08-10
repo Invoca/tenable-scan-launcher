@@ -90,23 +90,6 @@ type ExportSettings struct {
 	filePath string
 }
 
-func SetupExportSettings(filters []*Filter, searchType string, format string, chapters string, filePath string) (*ExportSettings, error) {
-	es := &ExportSettings{}
-
-	// supported formats  are Nessus, HTML, PDF, CSV, or DB
-	if format == "nessus" || format == "html" || format == "pdf" || format == "csv" || format == "db" {
-		es.format = format
-	} else {
-		return nil, fmt.Errorf("SetupExportSettings: Invalid format %s", format)
-	}
-	es.searchType = searchType
-	es.filter = filters
-	es.chapters = chapters
-	es.filePath = filePath
-	return es, nil
-}
-
-
 // TODO: Find a Better Name
 // TODO: Use generateReport bool
 type Tenable struct {
