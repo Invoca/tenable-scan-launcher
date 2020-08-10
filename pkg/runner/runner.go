@@ -114,20 +114,23 @@ func (r *Runner) getIPs() error {
 		}
 		awsIPs := r.ec2Svc.FetchIPs()
 		if len(awsIPs) == 0 {
-			log.Debug("No GCloud IPs found")
+			log.Debug("No AWS IPs found")
 		}
 
 		ips = append(ips, awsIPs...)
 	}
 
 	// targets is just for testing to make the scan go quicker
+	/*
 	var targets []string
 
 	target1 := "127.0.0.1"
 	targets = append(targets, target1)
 
 	r.tenable.SetTargets(targets)
-	//r.tenable.SetTargets(ips)
+	 */
+
+	r.tenable.SetTargets(ips)
 
 	log.Debug("\n\nALL:", ips)
 	return nil
