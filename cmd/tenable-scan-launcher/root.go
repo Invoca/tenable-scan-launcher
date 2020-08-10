@@ -304,7 +304,7 @@ func setupGCloud(cmd *cobra.Command) (*config.GCloudConfig, error) {
 }
 
 func setupRunner(cmd *cobra.Command) (*runner.Runner, error) {
-	runnerConfig := new(config.RunnerConfig)
+	runnerConfig := new(config.BaseConfig)
 
 	includeGCloud, err := cmd.Flags().GetBool("include-gcloud")
 	if err != nil {
