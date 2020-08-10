@@ -1,32 +1,49 @@
-package cloud
+package gcloud
 
 import (
+	"context"
 	"fmt"
+	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/option"
 	"sync"
-	"context"
 )
 
 
 type GCloud struct {
 	IPs		[]string
 	computeService wrapper.GCloudWrapper
-	regions []string
+	regions *[]string
 	mux sync.Mutex
 }
 
-func CreateGCloudInterface(projectName string, credentialsFilePath string) (*GCloudWrapper, error) {
-	option := option.WithCredentialsFile(credentialsFilePath)
+func (g *GCloud) FetchIPs() []string {
+	return g.IPs
+}
+
+func (g *GCloud) Setup(config *config.BaseConfig) error {
+	wrapper, err := CreateGCloudInterface(config)
+	if err != nil {
+		return fmt.Errorf("Setup: Error Creating GCloud Interface")
+	}
+
+	g.computeService = wrapper
+	g.IPs = *new([]string)
+
+	return nil
+}
+
+func CreateGCloudInterface(baseConfig *config.BaseConfig) (*GCloudWrapper, error) {
+	option := option.WithCredentialsFile(baseConfig.GCloudConfig.ServiceAccountPath)
 
 	computeService, err := compute.NewService(context.Background(), option)
 	if err != nil {
 		return nil, fmt.Errorf("SetupRunner: Error getting compute.Service object %s", err)
 	}
 
-	gCloudInterface, err := NewCloudWrapper(computeService, projectName)
+	gCloudInterface, err := newCloudWrapper(computeService, baseConfig.GCloudConfig.ProjectName)
 	if err != nil {
 		return nil, fmt.Errorf("SetupRunner: Error creating GCloud wrapper %s", err)
 	}
@@ -50,7 +67,7 @@ func (g *GCloud) getAllRegionsForProject() error {
 		return fmt.Errorf("getAllRegionsForProject: Error Getting Zones")
 	}
 
-	g.regions = regions
+	g.regions = &regions
 	return nil
 }
 
@@ -76,7 +93,7 @@ func (g *GCloud) getInstancesInRegion(region string) error {
 }
 
 // GetGCloudIPs
-func (g *GCloud) GetGCloudIPs() error {
+func (g *GCloud) RetrieveIPs() error {
 	log.Debug("Getting IPs from Google Cloud")
 
 	if &g.computeService == nil {
@@ -89,7 +106,7 @@ func (g *GCloud) GetGCloudIPs() error {
 		return fmt.Errorf("getAllRegionsForProject: regions cannot be nil")
 	}
 
-	for _, region := range g.regions {
+	for _, region := range *g.regions {
 		go g.getInstancesInRegion(region)
 	}
 	return nil
@@ -101,7 +118,7 @@ type GCloudWrapper struct{
 }
 
 
-func NewCloudWrapper(computeService *compute.Service, project string) (*GCloudWrapper, error) {
+func newCloudWrapper(computeService *compute.Service, project string) (*GCloudWrapper, error) {
 	if computeService == nil {
 		return nil, fmt.Errorf("NewCloudWrapper: computeService cannot be nil")
 	}

@@ -1,14 +1,14 @@
-package cloud
+package aws
 
 import (
 	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/mocks"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
-	log "github.com/sirupsen/logrus"
 )
 
 type getInstanceIpsTestCast struct {
