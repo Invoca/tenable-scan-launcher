@@ -13,14 +13,13 @@ import (
 type Runner struct {
 	ec2Svc wrapper.CloudWrapper
 	gcloud wrapper.CloudWrapper
-	tenable *tenable.Tenable
+	tenable wrapper.Tenable
 	includeGCloud bool
 	includeAWS bool
 	generateReport bool
 }
 
-func SetupRunner(config *config.BaseConfig) (*Runner, error) {
-	r := &Runner{}
+func (r *Runner) SetupRunner(config *config.BaseConfig) error {
 
 	r.includeAWS = config.IncludeAWS
 	r.includeGCloud = config.IncludeGCloud
@@ -29,7 +28,7 @@ func SetupRunner(config *config.BaseConfig) (*Runner, error) {
 		ec2Svc := &aws.AWSEc2{}
 		err := ec2Svc.Setup(config)
 		if err != nil {
-			return nil, fmt.Errorf("SetupRunner: Error setting up AWS")
+			return fmt.Errorf("SetupRunner: Error setting up AWS")
 		}
 		r.ec2Svc = ec2Svc
 	}
@@ -39,18 +38,18 @@ func SetupRunner(config *config.BaseConfig) (*Runner, error) {
 		r.gcloud = &gcloud.GCloud{}
 		err := r.gcloud.Setup(config)
 		if err != nil {
-			return nil, fmt.Errorf("SetupRunner: Error setting up GCloud")
+			return fmt.Errorf("SetupRunner: Error setting up GCloud")
 		}
 	}
 
 	tenableClient, err := tenable.SetupTenable(config.TenableConfig)
 	if err != nil {
-		return nil, fmt.Errorf("SetupRunner: Error creating tenable client")
+		return fmt.Errorf("SetupRunner: Error creating tenable client")
 	}
 	r.tenable = tenableClient
 
 	r.generateReport = config.TenableConfig.GenerateReport
-	return r, nil
+	return nil
 }
 
 func (r *Runner) Run() error {
@@ -59,17 +58,6 @@ func (r *Runner) Run() error {
 	if err != nil {
 		return fmt.Errorf("Run: Error getting ips %s", err)
 	}
-
-	if len(r.tenable.Targets) == 0 {
-		return fmt.Errorf("Run: No targets added to scan")
-	}
-
-	// targets is just for testing to make the scan go quicker
-	var targets []string
-
-	target1 := "127.0.0.1"
-	targets = append(targets, target1)
-	r.tenable.Targets = targets
 
 	err = r.tenable.LaunchScan()
 	if err != nil {
@@ -108,7 +96,7 @@ func (r *Runner) getIPs() error {
 	var err error
 
 	if r.includeGCloud {
-		err = r.gcloud.RetrieveIPs()
+		err = r.gcloud.GatherIPs()
 		if err != nil {
 			return fmt.Errorf("getIPs: Error retrieving GCloud IPs %s", err)
 		}
@@ -120,7 +108,7 @@ func (r *Runner) getIPs() error {
 	}
 
 	if r.includeAWS {
-		err = r.ec2Svc.RetrieveIPs()
+		err = r.ec2Svc.GatherIPs()
 		if err != nil {
 			return fmt.Errorf("getIPs: Error retrieving AWS IPs %s", err)
 		}
@@ -132,7 +120,14 @@ func (r *Runner) getIPs() error {
 		ips = append(ips, awsIPs...)
 	}
 
-	r.tenable.Targets = ips
+	// targets is just for testing to make the scan go quicker
+	var targets []string
+
+	target1 := "127.0.0.1"
+	targets = append(targets, target1)
+
+	r.tenable.SetTargets(targets)
+	//r.tenable.SetTargets(ips)
 
 	log.Debug("\n\nALL:", ips)
 	return nil

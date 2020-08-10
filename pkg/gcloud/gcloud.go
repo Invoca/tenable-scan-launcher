@@ -93,7 +93,7 @@ func (g *GCloud) getInstancesInRegion(region string) error {
 }
 
 // GetGCloudIPs
-func (g *GCloud) RetrieveIPs() error {
+func (g *GCloud) GatherIPs() error {
 	log.Debug("Getting IPs from Google Cloud")
 
 	if &g.computeService == nil {

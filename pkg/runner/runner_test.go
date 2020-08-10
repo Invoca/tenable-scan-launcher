@@ -1,6 +1,7 @@
 package runner
 
 import (
+	"github.com/Invoca/tenable-scan-launcher/pkg/mocks"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -31,11 +32,16 @@ func TestRun(t *testing.T) {
 	 */
 
 
-	ec2Mock := mock.Mock{}
+	ec2Mock := &mocks.MockCloudAPI{}
+
+	gcloudMock := &mocks.MockCloudAPI{}
+
+	tenableMock := &mocks.MockTenableAPI{}
+
 	runner := Runner{
 		ec2Svc:         ec2Mock,
-		gcloud:         nil,
-		tenable:        nil,
+		gcloud:         gcloudMock,
+		tenable:        tenableMock,
 		includeGCloud:  false,
 		includeAWS:     false,
 		generateReport: false,
@@ -45,6 +51,8 @@ func TestRun(t *testing.T) {
 		{
 			desc: "create export returns successfully",
 			setup: func() {
+				ec2Mock.On("GatherIPs", mock.Anything).Return(nil)
+				gcloudMock.On("GatherIPs", mock.Anything).Return(nil)
 			},
 			shouldError: false,
 		},
@@ -70,24 +78,12 @@ func TestRun(t *testing.T) {
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
+		err := runner.Run()
 
 		if testCase.shouldError {
 			assert.Error(t, err)
 		} else {
 			assert.NoError(t, err)
 		}
-
-		/*
-		tenable, server := setupTenable(t, &tenable, testCase.requestBodies, testCase.returnError, testCase.expectedPath)
-
-		err := tenable.DownloadExport()
-
-		if testCase.shouldError {
-			assert.Error(t, err)
-		} else {
-			assert.NoError(t, err)
-		}
-		server.Close()
-		*/
 	}
 }

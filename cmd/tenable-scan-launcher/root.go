@@ -62,10 +62,16 @@ instances given based on the scanner id. It is also able to export the scans and
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Debug("Setting up runner")
-			runner, err := setupRunner(cmd)
+			baseConfig, err := setupBaseConfig(cmd)
+			if err != nil {
+				return fmt.Errorf("RunE: Error seting up BaseConfig %s", err)
+			}
+
+			runner, err := setupRunner(baseConfig)
 			if err != nil {
 				return fmt.Errorf("RunE: Error seting up runner %s", err)
 			}
+
 			log.Debug("setup completed. Running command")
 			err = runner.Run()
 			if err != nil {
@@ -292,7 +298,7 @@ func setupGCloud(cmd *cobra.Command) (*config.GCloudConfig, error) {
 
 	gcloudProject, err := cmd.Flags().GetString("gcloud-project")
 	if err != nil {
-		return nil, fmt.Errorf("setupGCloud: error getting flag tenable-secret-key")
+		return nil, fmt.Errorf("setupGCloud: error getting flag gcloud-project")
 	}
 
 	gcloudConfig := &config.GCloudConfig{
@@ -303,8 +309,8 @@ func setupGCloud(cmd *cobra.Command) (*config.GCloudConfig, error) {
 	return gcloudConfig, nil
 }
 
-func setupRunner(cmd *cobra.Command) (*runner.Runner, error) {
-	runnerConfig := new(config.BaseConfig)
+func setupBaseConfig(cmd *cobra.Command) (*config.BaseConfig, error) {
+	baseConfig := new(config.BaseConfig)
 
 	includeGCloud, err := cmd.Flags().GetBool("include-gcloud")
 	if err != nil {
@@ -316,8 +322,8 @@ func setupRunner(cmd *cobra.Command) (*runner.Runner, error) {
 		return nil, fmt.Errorf("setupRunner: error getting flag include-aws")
 	}
 
-	runnerConfig.IncludeAWS = includeAWS
-	runnerConfig.IncludeGCloud = includeGCloud
+	baseConfig.IncludeAWS = includeAWS
+	baseConfig.IncludeGCloud = includeGCloud
 
 	log.Debug("Setting up Tenable Config")
 	tenableConfig, err := setupTenable(cmd)
@@ -325,7 +331,7 @@ func setupRunner(cmd *cobra.Command) (*runner.Runner, error) {
 		return nil, fmt.Errorf("setupRunner: Error seting up tenableClient %s", err)
 	}
 
-	runnerConfig.TenableConfig = tenableConfig
+	baseConfig.TenableConfig = tenableConfig
 
 	if includeGCloud {
 		log.Debug("Setting up GCloud Config")
@@ -333,10 +339,15 @@ func setupRunner(cmd *cobra.Command) (*runner.Runner, error) {
 		if err != nil {
 			return nil, fmt.Errorf("setupRunner: Error seting up GCloud %s", err)
 		}
-		runnerConfig.GCloudConfig = gCloudConfig
+		baseConfig.GCloudConfig = gCloudConfig
 	}
+	return baseConfig, nil
+}
 
-	runner, err := runner.SetupRunner(runnerConfig)
+func setupRunner(baseConfig *config.BaseConfig) (*runner.Runner, error) {
+	runner := &runner.Runner{}
+
+	err := runner.SetupRunner(baseConfig)
 	if err != nil {
 		return nil, fmt.Errorf("setupRunner: Error seting up runner %s", err)
 	}
