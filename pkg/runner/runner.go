@@ -3,6 +3,7 @@ package runner
 import (
 	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/cloud"
+	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	log "github.com/sirupsen/logrus"
@@ -11,30 +12,47 @@ import (
 type Runner struct {
 	ec2Svc *ec2.EC2
 	gcloud cloud.GCloud
-	awsInterface cloud.EC2Ips
 	tenable *tenable.Tenable
 	includeGCloud bool
 	includeAWS bool
+	generateReport bool
 }
 
-func SetupRunner (tenableClient *tenable.Tenable, gCloudInterface *cloud.GCloudWrapper, ec2Interface *ec2.EC2, includeGCloud bool, includeAWS bool) (*Runner, error) {
+func SetupRunner (config *config.RunnerConfig) (*Runner, error) {
 	r := &Runner{}
 
-	r.includeAWS = includeAWS
-	r.includeGCloud = includeGCloud
+	r.includeAWS = config.IncludeAWS
+	r.includeGCloud = config.IncludeGCloud
 
-	if includeAWS {
-		r.ec2Svc = ec2Interface
-		r.awsInterface = cloud.EC2Ips{}
+	if r.includeAWS {
+		ec2Svc, err := cloud.SetupAWS()
+		if err != nil {
+			return nil, fmt.Errorf("SetupRunner: Error setting up AWS")
+		}
+		r.ec2Svc = ec2Svc
 	}
 
 
-	if includeGCloud {
+	if r.includeGCloud {
 		r.gcloud = cloud.GCloud{}
-		r.gcloud.SetupGCloud(gCloudInterface)
+		gcloudInterface, err := cloud.CreateGCloudInterface(config.GCloudConfig.ProjectName, config.GCloudConfig.ServiceAccountPath)
+		if err != nil {
+			return nil, fmt.Errorf("SetupRunner: Error creating GCloudInterface")
+		}
+
+		err = r.gcloud.SetupGCloud(gcloudInterface)
+		if err != nil {
+			return nil, fmt.Errorf("SetupRunner: Error setting up GCloud")
+		}
 	}
 
+	tenableClient, err := tenable.SetupTenable(config.TenableConfig)
+	if err != nil {
+		return nil, fmt.Errorf("SetupRunner: Error creating tenable client")
+	}
 	r.tenable = tenableClient
+
+	r.generateReport = config.TenableConfig.GenerateReport
 	return r, nil
 }
 
@@ -66,19 +84,21 @@ func (r *Runner) Run() error {
 		return fmt.Errorf("Run: Error Waiting For Scan To Complete %s", err)
 	}
 
-	err = r.tenable.StartExport()
-	if err != nil {
-		return fmt.Errorf("Run: Error Starting Scan %s", err)
-	}
+	if r.generateReport {
+		err = r.tenable.StartExport()
+		if err != nil {
+			return fmt.Errorf("Run: Error Starting Scan %s", err)
+		}
 
-	err = r.tenable.WaitForExport()
-	if err != nil {
-		return fmt.Errorf("Run: Error Waiting For Export %s", err)
-	}
+		err = r.tenable.WaitForExport()
+		if err != nil {
+			return fmt.Errorf("Run: Error Waiting For Export %s", err)
+		}
 
-	err = r.tenable.DownloadExport()
-	if err != nil {
-		return fmt.Errorf("Run: Error Downloading Export %s", err)
+		err = r.tenable.DownloadExport()
+		if err != nil {
+			return fmt.Errorf("Run: Error Downloading Export %s", err)
+		}
 	}
 
 	log.Debug("Run Finished")

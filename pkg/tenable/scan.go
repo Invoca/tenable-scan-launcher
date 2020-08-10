@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -37,6 +38,50 @@ func CreateFilter(filter string, quality string, value string) (*Filter, error) 
 
 }
 
+func setupSeverityFilter(low bool, medium bool, high bool, critical bool) ([]*Filter, error) {
+	if (low || medium || high || critical) == false {
+		return nil, fmt.Errorf("setupSeverityFilter: Cannot generate a report without specifiying severity filters")
+	}
+
+	var filters []*Filter
+	filterName := "severity"
+	filterQuality := "eq"
+
+	if low {
+		newFilter, err := CreateFilter(filterName, filterQuality, "Low")
+		if err != nil {
+			return nil, fmt.Errorf("setupSeverityFilter: Error Creating Low Severity Filter")
+		}
+
+		filters = append(filters, newFilter)
+	}
+	if medium {
+		newFilter, err := CreateFilter(filterName, filterQuality, "Medium")
+		if err != nil {
+			return nil, fmt.Errorf("setupSeverityFilter: Error Creating Medium Severity Filter")
+		}
+
+		filters = append(filters, newFilter)
+	}
+	if high {
+		newFilter, err := CreateFilter(filterName, filterQuality, "High")
+		if err != nil {
+			return nil, fmt.Errorf("setupSeverityFilter: Error Creating High Severity Filter")
+		}
+
+		filters = append(filters, newFilter)
+	}
+	if critical {
+		newFilter, err := CreateFilter(filterName, filterQuality, "Critical")
+		if err != nil {
+			return nil, fmt.Errorf("setupSeverityFilter: Error Creating Critical Severity Filter")
+		}
+
+		filters = append(filters, newFilter)
+	}
+	return filters, nil
+}
+
 type ExportSettings struct {
 	filter []*Filter
 	chapters string
@@ -63,32 +108,59 @@ func SetupExportSettings(filters []*Filter, searchType string, format string, ch
 
 
 // TODO: Find a Better Name
+// TODO: Use generateReport bool
 type Tenable struct {
-	accessKey 	string
-	secretKey 	string
-	Targets		[]string
-	scanID 		string
-	fileId		string
-	scanUuid 	string
-	tenableURL 	string
-	status		*scanStatus
-	export 		*ExportSettings
+	accessKey 		string
+	secretKey 		string
+	Targets			[]string
+	scanID 			string
+	fileId			string
+	scanUuid 		string
+	tenableURL 		string
+	status			*scanStatus
+	export 			*ExportSettings
+	generateReport 	bool
 }
 
-func SetupClient(accessKey string, secretKey string, scanID string, export *ExportSettings) *Tenable {
-	t := Tenable{
-		accessKey:  accessKey,
-		secretKey:  secretKey,
+func SetupTenable(tenableConfig *config.TenableConfig) (*Tenable, error) {
+	var filters []*Filter
+	var err error
+
+	format := tenableConfig.Format
+	if tenableConfig.GenerateReport {
+		// supported formats  are Nessus, HTML, PDF, CSV, or DB
+		if format != "nessus" && format != "html" && format != "pdf" && format != "csv" && format == "db" {
+			return nil, fmt.Errorf("SetupTenable: Invalid format %s", format)
+		}
+
+		filters, err = setupSeverityFilter(tenableConfig.LowSeverity, tenableConfig.MediumSeverity, tenableConfig.HighSeverity, tenableConfig.CriticalSeverity)
+		if err != nil {
+			return nil, fmt.Errorf("SetupTenable: Error creating ")
+		}
+	}
+	es := &ExportSettings{
+		filter:     filters,
+		chapters:   tenableConfig.Chapters,
+		searchType: tenableConfig.SearchType,
+		format:     tenableConfig.Format,
+		filePath:   tenableConfig.FilePath,
+	}
+	t := &Tenable{
+		accessKey:  tenableConfig.AccessKey,
+		secretKey:  tenableConfig.SecretKey,
 		Targets:    nil,
-		scanID:     scanID,
+		scanID:     tenableConfig.ScanID,
+		fileId:     "",
+		scanUuid:   "",
 		tenableURL: "https://cloud.tenable.com",
-		status: &scanStatus{
+		status:     &scanStatus{
 			Pending:   false,
 			Running:   false,
 		},
-		export: export,
+		export:     es,
+		generateReport: tenableConfig.GenerateReport,
 	}
-	return &t
+	return t, nil
 }
 
 type launchScanBody struct {
@@ -287,6 +359,10 @@ func (t *Tenable) checkScanProgess() (string, error) {
 }
 
 func (t *Tenable) StartExport() error {
+	if t.generateReport == false {
+		return fmt.Errorf("StartExport: generateReport has been set to false. Method should not be called")
+	}
+
 	fmt.Println("Starting Export")
 
 	if t.scanID == "" {
@@ -404,6 +480,10 @@ func (t *Tenable) checkExport() (string, error) {
 }
 
 func (t *Tenable) DownloadExport() error {
+	if t.generateReport == false {
+		return fmt.Errorf("DownloadExport: generateReport has been set to false. Method should not be called")
+	}
+
 	log.Debug("Downloading export")
 
 	if t.fileId == "" {

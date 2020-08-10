@@ -2,6 +2,7 @@ package cloud
 
 import (
 	"fmt"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 	log "github.com/sirupsen/logrus"
 
@@ -11,6 +12,16 @@ import (
 
 type EC2Ips struct {
 	IPs		[]string
+}
+
+func SetupAWS() (*ec2.EC2, error) {
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+	if sess == nil {
+		return nil, fmt.Errorf("setupAWS: Error creating session object")
+	}
+	return ec2.New(sess), nil
 }
 
 // GetAWSIPs
