@@ -91,7 +91,6 @@ type ExportSettings struct {
 }
 
 // TODO: Find a Better Name
-// TODO: Use generateReport bool
 type Tenable struct {
 	accessKey 		string
 	secretKey 		string
@@ -103,6 +102,11 @@ type Tenable struct {
 	status			*scanStatus
 	export 			*ExportSettings
 	generateReport 	bool
+}
+
+func (t *Tenable) SetTargets(targets []string) error {
+	t.Targets = targets
+	return nil
 }
 
 func SetupTenable(tenableConfig *config.TenableConfig) (*Tenable, error) {
