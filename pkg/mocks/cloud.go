@@ -21,6 +21,7 @@ func (m *MockCloudAPI) Setup(input *config.BaseConfig) error {
 func (m *MockCloudAPI) GatherIPs() ([]string, error) {
 	fmt.Println("DescribeInstances Mock")
 	args := m.Called()
+	fmt.Println(args)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	} else {
