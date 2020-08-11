@@ -55,9 +55,6 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("FetchIPs", mock.Anything).Return(nil)
-				gcloudMock.On("FetchIPs", mock.Anything).Return(nil)
-
 				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
@@ -77,9 +74,6 @@ func TestRun(t *testing.T) {
 
 				ec2Mock.IPs = nil
 				gcloudMock.IPs = gcloudInstances
-
-				ec2Mock.On("FetchIPs", mock.Anything).Return(fmt.Errorf("EC2 Error"))
-				gcloudMock.On("FetchIPs", mock.Anything).Return(nil)
 
 				ec2Mock.On("GatherIPs", mock.Anything).Return(nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(nil)
@@ -101,9 +95,6 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = nil
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("FetchIPs", mock.Anything).Return(nil)
-				gcloudMock.On("FetchIPs", mock.Anything).Return(fmt.Errorf("GCloud Error"))
-
 				ec2Mock.On("GatherIPs", mock.Anything).Return(nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(nil)
 
@@ -115,53 +106,7 @@ func TestRun(t *testing.T) {
 			shouldError: true,
 		},
 		{
-			desc: "AWS and GCloud are both not able to Gather IPs",
-			setup: func() {
-				ec2Mock.Reset()
-				gcloudMock.Reset()
-				tenableMock.Reset()
-
-				ec2Mock.IPs = nil
-				gcloudMock.IPs = nil
-
-				ec2Mock.On("FetchIPs", mock.Anything).Return(nil)
-				gcloudMock.On("FetchIPs", mock.Anything).Return(nil)
-
-				ec2Mock.On("GatherIPs", mock.Anything).Return(fmt.Errorf("AWS Error"))
-				gcloudMock.On("GatherIPs", mock.Anything).Return(nil)
-
-				tenableMock.On("SetTargets", mock.Anything).Return(nil)
-				tenableMock.On("LaunchScan").Return(nil)
-				tenableMock.On("SetTargets").Return(nil)
-				tenableMock.On("WaitForScanToComplete").Return(nil)
-			},
-			shouldError: true,
-		},
-		{
-			desc: "AWS and GCloud are both not able to Gather IPs without issue",
-			setup: func() {
-				ec2Mock.Reset()
-				gcloudMock.Reset()
-				tenableMock.Reset()
-
-				ec2Mock.IPs = nil
-				gcloudMock.IPs = nil
-
-				ec2Mock.On("FetchIPs", mock.Anything).Return(nil)
-				gcloudMock.On("FetchIPs", mock.Anything).Return(nil)
-
-				ec2Mock.On("GatherIPs", mock.Anything).Return(nil)
-				gcloudMock.On("GatherIPs", mock.Anything).Return(fmt.Errorf("GCloud Error"))
-
-				tenableMock.On("SetTargets", mock.Anything).Return(nil)
-				tenableMock.On("LaunchScan").Return(nil)
-				tenableMock.On("SetTargets").Return(nil)
-				tenableMock.On("WaitForScanToComplete").Return(nil)
-			},
-			shouldError: true,
-		},
-		{
-			desc: "AWS and GCloud are both not able to Gather IPs without issue",
+			desc: "Tenable is not able to SetTargets",
 			setup: func() {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
@@ -184,7 +129,7 @@ func TestRun(t *testing.T) {
 			shouldError: true,
 		},
 		{
-			desc: "AWS and GCloud are both not able to Gather IPs without issue",
+			desc: "Tenable is not able to LaunchScan",
 			setup: func() {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
@@ -207,7 +152,7 @@ func TestRun(t *testing.T) {
 			shouldError: true,
 		},
 		{
-			desc: "AWS and GCloud are both not able to Gather IPs without issue",
+			desc: "Tenable is not able to SetTargets",
 			setup: func() {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
@@ -230,7 +175,7 @@ func TestRun(t *testing.T) {
 			shouldError: true,
 		},
 		{
-			desc: "AWS and GCloud are both not able to Gather IPs without issue",
+			desc: "Tenable is not able to WaitForScanToComplete",
 			setup: func() {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
