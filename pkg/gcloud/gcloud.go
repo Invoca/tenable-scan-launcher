@@ -19,10 +19,6 @@ type GCloud struct {
 	mux sync.Mutex
 }
 
-func (g *GCloud) FetchIPs() []string {
-	return g.IPs
-}
-
 func (g *GCloud) Setup(config *config.BaseConfig) error {
 	wrapper, err := CreateGCloudInterface(config)
 	if err != nil {
@@ -93,23 +89,24 @@ func (g *GCloud) getInstancesInRegion(region string) error {
 }
 
 // GetGCloudIPs
-func (g *GCloud) GatherIPs() error {
+func (g *GCloud) GatherIPs() ([]string, error) {
 	log.Debug("Getting IPs from Google Cloud")
 
 	if &g.computeService == nil {
-		return fmt.Errorf("getAllRegionsForProject: computeService cannot be nil")
+		return nil, fmt.Errorf("getAllRegionsForProject: computeService cannot be nil")
 	}
 
 	g.getAllRegionsForProject()
 
 	if &g.regions == nil {
-		return fmt.Errorf("getAllRegionsForProject: regions cannot be nil")
+		return nil, fmt.Errorf("getAllRegionsForProject: regions cannot be nil")
 	}
 
 	for _, region := range *g.regions {
 		go g.getInstancesInRegion(region)
 	}
-	return nil
+
+	return g.IPs, nil
 }
 
 type GCloudWrapper struct{

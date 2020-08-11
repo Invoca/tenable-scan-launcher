@@ -93,14 +93,14 @@ func (r *Runner) Run() error {
 func (r *Runner) getIPs() error {
 	log.Debug("getIPs")
 	var  ips []string
-	var err error
 
 	if r.includeGCloud {
-		err = r.gcloud.GatherIPs()
+		log.Debug("Gathering Google Cloud IPs")
+		gcloudIPs, err := r.gcloud.GatherIPs()
+		log.Debug(err)
 		if err != nil {
 			return fmt.Errorf("getIPs: Error retrieving GCloud IPs %s", err)
 		}
-		gcloudIPs := r.gcloud.FetchIPs()
 		if len(gcloudIPs) == 0 {
 			log.Debug("No GCloud IPs found")
 		}
@@ -108,11 +108,11 @@ func (r *Runner) getIPs() error {
 	}
 
 	if r.includeAWS {
-		err = r.ec2Svc.GatherIPs()
+		log.Debug("Gathering AWS IPs")
+		awsIPs, err := r.ec2Svc.GatherIPs()
 		if err != nil {
 			return fmt.Errorf("getIPs: Error retrieving AWS IPs %s", err)
 		}
-		awsIPs := r.ec2Svc.FetchIPs()
 		if len(awsIPs) == 0 {
 			log.Debug("No AWS IPs found")
 		}
