@@ -16,10 +16,6 @@ type AWSEc2 struct {
 	Ec2svc ec2iface.EC2API
 }
 
-func (m *AWSEc2) FetchIPs() []string {
-	return m.IPs
-}
-
 func (m *AWSEc2)  Setup(config *config.BaseConfig) error {
 	if config.IncludeAWS == false {
 		return fmt.Errorf("Setup: AWS is not supposed to be included")
@@ -37,7 +33,7 @@ func (m *AWSEc2)  Setup(config *config.BaseConfig) error {
 }
 
 // GetAWSIPs
-func (m *AWSEc2) GatherIPs() error {
+func (m *AWSEc2) GatherIPs() ([]string, error) {
 	log.Debug("Getting AWS IPs")
 
 	if m.Ec2svc == nil {
@@ -46,15 +42,15 @@ func (m *AWSEc2) GatherIPs() error {
 
 	instances, err := m.getInstances(m.Ec2svc)
 	if err != nil {
-		return fmt.Errorf("GetAWSIPs: Could not get list of instances %s", err)
+		return nil, fmt.Errorf("GetAWSIPs: Could not get list of instances %s", err)
 	}
 
 	err = m.parseInstances(instances)
 	if err != nil {
-		return fmt.Errorf("GetAWSIPs: Could not parse instances given %s", err)
+		return nil, fmt.Errorf("GetAWSIPs: Could not parse instances given %s", err)
 	}
 
-	return nil
+	return m.IPs, nil
 }
 
 func (m *AWSEc2) getInstances(ec2Svc ec2iface.EC2API) ([]*ec2.Reservation, error) {
