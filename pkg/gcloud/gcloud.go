@@ -67,6 +67,12 @@ func (g *GCloud) getAllRegionsForProject() error {
 	return nil
 }
 
+func (g *GCloud) addIPsToStruct(ips []string) {
+	g.mux.Lock()
+	g.IPs = append(g.IPs, ips...)
+	g.mux.Unlock()
+}
+
 func (g *GCloud) getInstancesInRegion(region string) error {
 	if &region == nil {
 		fmt.Errorf("getInstancesInRegion: region cannot be nil")
@@ -82,9 +88,7 @@ func (g *GCloud) getInstancesInRegion(region string) error {
 
 	log.Debug("getInstancesInRegion: ", privateIps)
 
-	g.mux.Lock()
-	g.IPs = append(g.IPs, privateIps...)
-	g.mux.Unlock()
+	g.addIPsToStruct(privateIps)
 	return nil
 }
 

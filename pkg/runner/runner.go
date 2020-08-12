@@ -33,7 +33,6 @@ func (r *Runner) SetupRunner(config *config.BaseConfig) error {
 		r.ec2Svc = ec2Svc
 	}
 
-
 	if r.includeGCloud {
 		r.gcloud = &gcloud.GCloud{}
 		err := r.gcloud.Setup(config)
@@ -81,15 +80,20 @@ func (r *Runner) Run() error {
 			return fmt.Errorf("Run: Error Starting Scan %s", err)
 		}
 
+		log.Debug("Export Started. Waiting for file to be ready.")
+
 		err = r.tenable.WaitForExport()
 		if err != nil {
 			return fmt.Errorf("Run: Error Waiting For Export %s", err)
 		}
 
+		log.Debug("Starting file download")
+
 		err = r.tenable.DownloadExport()
 		if err != nil {
 			return fmt.Errorf("Run: Error Downloading Export %s", err)
 		}
+		log.Debug("File successfully downloaded")
 	}
 
 	log.Debug("Run Finished")

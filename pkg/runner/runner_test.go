@@ -13,9 +13,7 @@ import (
 type testCase struct {
 	desc        string
 	setup       func()
-	post 		func()
 	shouldError bool
-	returnError bool
 }
 
 func TestRun(t *testing.T) {
@@ -41,7 +39,7 @@ func TestRun(t *testing.T) {
 		tenable:        tenableMock,
 		includeGCloud:  true,
 		includeAWS:     true,
-		generateReport: false,
+		generateReport: true,
 	}
 	
 	testCases := []testCase{
@@ -59,9 +57,11 @@ func TestRun(t *testing.T) {
 				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
-				tenableMock.On("LaunchScan").Return(nil)
-				tenableMock.On("SetTargets").Return(nil)
-				tenableMock.On("WaitForScanToComplete").Return(nil)
+				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
+				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+				tenableMock.On("StartExport", mock.Anything).Return(nil)
+				tenableMock.On("WaitForExport", mock.Anything).Return(nil)
+				tenableMock.On("DownloadExport", mock.Anything).Return(nil)
 			},
 			shouldError: false,
 		},
@@ -149,13 +149,76 @@ func TestRun(t *testing.T) {
 			},
 			shouldError: true,
 		},
+		{
+			desc: "Tenable is not able to StartExport",
+			setup: func() {
+				ec2Mock.Reset()
+				gcloudMock.Reset()
+				tenableMock.Reset()
+
+				ec2Mock.IPs = awsInstances
+				gcloudMock.IPs = gcloudInstances
+
+				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
+
+				tenableMock.On("SetTargets", mock.Anything).Return(nil)
+				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
+				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+				tenableMock.On("StartExport", mock.Anything).Return(fmt.Errorf("Error!"))
+			},
+			shouldError: true,
+		},
+		{
+			desc: "Tenable is not able to WaitForExport",
+			setup: func() {
+				ec2Mock.Reset()
+				gcloudMock.Reset()
+				tenableMock.Reset()
+
+				ec2Mock.IPs = awsInstances
+				gcloudMock.IPs = gcloudInstances
+
+				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
+
+				tenableMock.On("SetTargets", mock.Anything).Return(nil)
+				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
+				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+				tenableMock.On("StartExport", mock.Anything).Return(nil)
+				tenableMock.On("WaitForExport", mock.Anything).Return(fmt.Errorf("Error!"))
+			},
+			shouldError: true,
+		},
+		{
+			desc: "Tenable is not able to DownloadExport",
+			setup: func() {
+				ec2Mock.Reset()
+				gcloudMock.Reset()
+				tenableMock.Reset()
+
+				ec2Mock.IPs = awsInstances
+				gcloudMock.IPs = gcloudInstances
+
+				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
+
+				tenableMock.On("SetTargets", mock.Anything).Return(nil)
+				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
+				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+				tenableMock.On("StartExport", mock.Anything).Return(nil)
+				tenableMock.On("WaitForExport", mock.Anything).Return(nil)
+				tenableMock.On("DownloadExport", mock.Anything).Return(fmt.Errorf("Error!"))
+			},
+			shouldError: true,
+		},
+
 	}
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
 			"desc": testCase.desc,
 			"shouldError": testCase.shouldError,
-			"returnError": testCase.returnError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		if testCase.setup != nil {
@@ -169,10 +232,6 @@ func TestRun(t *testing.T) {
 			"shouldError": testCase.shouldError,
 			"Error": err,
 		}).Debug("Run() complete")
-
-		if testCase.post != nil {
-			testCase.post()
-		}
 
 		if testCase.shouldError {
 			assert.Error(t, err)
