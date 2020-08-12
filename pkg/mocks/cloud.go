@@ -1,7 +1,6 @@
 package mocks
 
 import (
-	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,13 +18,8 @@ func (m *MockCloudAPI) Setup(input *config.BaseConfig) error {
 }
 
 func (m *MockCloudAPI) GatherIPs() ([]string, error) {
-	fmt.Println("GatherIPs Mock")
+	log.Debug("GatherIPs Mock")
 	args := m.Called()
-	fmt.Println(args)
-	// fails below, but does not work with args.Get(0)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	} else {
-		return args.Get(0).([]string), args.Error(1)
-	}
+	log.Debug(args)
+	return m.IPs, args.Error(1)
 }
