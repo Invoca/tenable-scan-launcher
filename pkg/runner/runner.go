@@ -59,15 +59,21 @@ func (r *Runner) Run() error {
 		return fmt.Errorf("Run: Error getting ips %s", err)
 	}
 
+	log.Debug("IPs have been gathered from sources. Launching scan.")
+
 	err = r.tenable.LaunchScan()
 	if err != nil {
 		return fmt.Errorf("Run: Error launching scan %s", err)
 	}
 
+	log.Debug("Scan launched. Waiting for scan to complete.")
+
 	err = r.tenable.WaitForScanToComplete()
 	if err != nil {
 		return fmt.Errorf("Run: Error Waiting For Scan To Complete %s", err)
 	}
+
+	log.Debug("Scan complete.")
 
 	if r.generateReport {
 		err = r.tenable.StartExport()
@@ -130,7 +136,11 @@ func (r *Runner) getIPs() error {
 	r.tenable.SetTargets(targets)
 	 */
 
-	r.tenable.SetTargets(ips)
+	err := r.tenable.SetTargets(ips)
+
+	if err != nil {
+		return fmt.Errorf("getIPs: Error setting Tenable targets")
+	}
 
 	log.Debug("\n\nALL:", ips)
 	return nil

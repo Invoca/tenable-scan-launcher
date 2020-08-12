@@ -75,13 +75,8 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = nil
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("GatherIPs", mock.Anything).Return(nil)
-				gcloudMock.On("GatherIPs", mock.Anything).Return(nil)
-
-				tenableMock.On("SetTargets", mock.Anything).Return(nil)
-				tenableMock.On("LaunchScan").Return(nil)
-				tenableMock.On("SetTargets").Return(nil)
-				tenableMock.On("WaitForScanToComplete").Return(nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return(nil, fmt.Errorf("Error!"))
+				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 			},
 			shouldError: true,
 		},
@@ -92,16 +87,11 @@ func TestRun(t *testing.T) {
 				gcloudMock.Reset()
 				tenableMock.Reset()
 
-				ec2Mock.IPs = nil
-				gcloudMock.IPs = gcloudInstances
+				ec2Mock.IPs = awsInstances
+				gcloudMock.IPs = nil
 
-				ec2Mock.On("GatherIPs", mock.Anything).Return(nil)
-				gcloudMock.On("GatherIPs", mock.Anything).Return(nil)
-
-				tenableMock.On("SetTargets", mock.Anything).Return(nil)
-				tenableMock.On("LaunchScan").Return(nil)
-				tenableMock.On("SetTargets").Return(nil)
-				tenableMock.On("WaitForScanToComplete").Return(nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
+				gcloudMock.On("GatherIPs", mock.Anything).Return(nil, fmt.Errorf("Error!"))
 			},
 			shouldError: true,
 		},
@@ -115,16 +105,10 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("FetchIPs", mock.Anything).Return(nil)
-				gcloudMock.On("FetchIPs", mock.Anything).Return(nil)
-
-				ec2Mock.On("GatherIPs", mock.Anything).Return(nil)
-				gcloudMock.On("GatherIPs", mock.Anything).Return(nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(fmt.Errorf("Tenable Error"))
-				tenableMock.On("LaunchScan").Return(nil)
-				tenableMock.On("SetTargets").Return(nil)
-				tenableMock.On("WaitForScanToComplete").Return(nil)
 			},
 			shouldError: true,
 		},
@@ -138,39 +122,11 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("FetchIPs", mock.Anything).Return(nil)
-				gcloudMock.On("FetchIPs", mock.Anything).Return(nil)
-
-				ec2Mock.On("GatherIPs", mock.Anything).Return(nil)
-				gcloudMock.On("GatherIPs", mock.Anything).Return(nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
-				tenableMock.On("LaunchScan").Return(fmt.Errorf("Tenable Error"))
-				tenableMock.On("SetTargets").Return(nil)
-				tenableMock.On("WaitForScanToComplete").Return(nil)
-			},
-			shouldError: true,
-		},
-		{
-			desc: "Tenable is not able to SetTargets",
-			setup: func() {
-				ec2Mock.Reset()
-				gcloudMock.Reset()
-				tenableMock.Reset()
-
-				ec2Mock.IPs = awsInstances
-				gcloudMock.IPs = gcloudInstances
-
-				ec2Mock.On("FetchIPs", mock.Anything).Return(nil)
-				gcloudMock.On("FetchIPs", mock.Anything).Return(nil)
-
-				ec2Mock.On("GatherIPs", mock.Anything).Return(nil)
-				gcloudMock.On("GatherIPs", mock.Anything).Return(nil)
-
-				tenableMock.On("SetTargets", mock.Anything).Return(nil)
-				tenableMock.On("LaunchScan").Return(nil)
-				tenableMock.On("SetTargets").Return(fmt.Errorf("Tenable Error"))
-				tenableMock.On("WaitForScanToComplete").Return(nil)
+				tenableMock.On("LaunchScan", mock.Anything).Return(fmt.Errorf("Tenable Error"))
 			},
 			shouldError: true,
 		},
@@ -184,20 +140,15 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("FetchIPs", mock.Anything).Return(nil)
-				gcloudMock.On("FetchIPs", mock.Anything).Return(nil)
-
-				ec2Mock.On("GatherIPs", mock.Anything).Return(nil)
-				gcloudMock.On("GatherIPs", mock.Anything).Return(nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
-				tenableMock.On("LaunchScan").Return(nil)
-				tenableMock.On("SetTargets").Return(nil)
-				tenableMock.On("WaitForScanToComplete").Return(fmt.Errorf("Tenable Error"))
+				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
+				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(fmt.Errorf("Tenable Error"))
 			},
 			shouldError: true,
 		},
-
 	}
 
 	for index, testCase := range testCases {
@@ -213,6 +164,11 @@ func TestRun(t *testing.T) {
 		}
 
 		err := runner.Run()
+
+		log.WithFields(log.Fields{
+			"shouldError": testCase.shouldError,
+			"Error": err,
+		}).Debug("Run() complete")
 
 		if testCase.post != nil {
 			testCase.post()
