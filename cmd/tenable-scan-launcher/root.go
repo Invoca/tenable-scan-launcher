@@ -51,8 +51,8 @@ import (
 
 */
 
-var (
-	rootCmd = &cobra.Command{
+func NewRootCmd() *cobra.Command {
+	cmd := &cobra.Command{
 		Use:   "tenable-scanner",
 		Short: "Gets IPs and launches scans",
 		Long: `tenable-scanner collects ip address from Google Cloud and AWS and launches a scan on the ips of the 
@@ -67,27 +67,24 @@ instances given based on the scanner id. It is also able to export the scans and
 				return fmt.Errorf("RunE: Error seting up BaseConfig %s", err)
 			}
 
-			runner, err := setupRunner(baseConfig)
+			runnerSvc, err := setupRunner(baseConfig)
 			if err != nil {
 				return fmt.Errorf("RunE: Error seting up runner %s", err)
 			}
 
-			log.Debug("setup completed. Running command")
-			err = runner.Run()
+			log.Debug("Setup completed. Running command")
+			err = runnerSvc.Run()
 			if err != nil {
 				return fmt.Errorf("RunE: Error running runner %s", err)
 			}
 			return nil
 		},
 	}
-)
-
-// Execute executes the root command.
-func Execute() error {
-	return rootCmd.Execute()
+	initCmd(cmd)
+	return cmd
 }
 
-func init() {
+func initCmd(rootCmd *cobra.Command) {
 	rootCmd.PersistentFlags().StringP("log-level", "", "", "Log level (trace,info,fatal,panic,warn, debug) default is debug")
 	rootCmd.PersistentFlags().StringP("log-type", "", "", "Log type (text,json)")
 
@@ -154,7 +151,7 @@ func setupLogging(cmd *cobra.Command) error {
 	return nil
 }
 
-func setupTenableExport(cmd *cobra.Command, tenableConfig *config.TenableConfig) (error) {
+func setupTenableExport(cmd *cobra.Command, tenableConfig *config.TenableConfig) error {
 	lowSeverity, err := cmd.Flags().GetBool("low-severity")
 	if err != nil {
 		return fmt.Errorf("setupTenableExport: error getting flag low-severity")
