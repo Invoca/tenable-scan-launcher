@@ -122,7 +122,7 @@ func SetupTenable(tenableConfig *config.TenableConfig) (*Tenable, error) {
 
 		filters, err = setupSeverityFilter(tenableConfig.LowSeverity, tenableConfig.MediumSeverity, tenableConfig.HighSeverity, tenableConfig.CriticalSeverity)
 		if err != nil {
-			return nil, fmt.Errorf("SetupTenable: Error creating ")
+			return nil, fmt.Errorf("SetupTenable: Error creating severityFilter")
 		}
 	}
 	es := &ExportSettings{
