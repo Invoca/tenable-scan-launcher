@@ -1,76 +1,198 @@
 package main
 
 import (
-	"github.com/spf13/cobra"
+	"github.com/Invoca/tenable-scan-launcher/pkg/config"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"strconv"
 	"testing"
 )
 
-/*
-	rootCmd.PersistentFlags().StringP("log-level", "", "", "Log level (trace,info,fatal,panic,warn, debug) default is debug")
-	rootCmd.PersistentFlags().StringP("log-type", "", "", "Log type (text,json)")
-
-	rootCmd.PersistentFlags().StringP("tenable-access-key", "a", "", "tenable access key")
-	rootCmd.PersistentFlags().StringP("tenable-secret-key", "s", "", "tenable secret key")
-	rootCmd.PersistentFlags().StringP("tenable-scan-id", "i", "", "tenable scanID")
-
-
-	rootCmd.PersistentFlags().BoolP("include-gcloud", "g", false, "Include Google Cloud Instances In Report")
-	rootCmd.PersistentFlags().StringP("gcloud-service-account-path", "", "", "Path of service account token. Uses default if not specified")
-	rootCmd.PersistentFlags().StringP("gcloud-project", "p", "", "GCloud project to list instances from")
-
-	rootCmd.PersistentFlags().BoolP("include-aws", "A", false, "Include AWS Instances In Report")
-
-
-	rootCmd.PersistentFlags().BoolP("generate-report", "R", false, "Generate A report after the scan is complete")
-	rootCmd.PersistentFlags().BoolP("low-severity", "L", false, "Add Low Severity To Report")
-	rootCmd.PersistentFlags().BoolP("medium-severity", "M", false, "Add Medium Severity To Report")
-	rootCmd.PersistentFlags().BoolP("high-severity", "H", false, "Add High Severity To Report")
-	rootCmd.PersistentFlags().BoolP("critical-severity", "C", false, "Add Critical Severity To Report")
-
-	rootCmd.PersistentFlags().StringP("filter-search-type", "", "", "Search type to use in report. Only (and, or) are supported")
-	rootCmd.PersistentFlags().StringP("report-format", "", "", "Report Format of the scan. Support formats are Nessus, HTML, PDF, CSV, or DB")
-	rootCmd.PersistentFlags().StringP("report-chapters", "", "", "Chapters to include in the report")
-	rootCmd.PersistentFlags().BoolP("summary-report", "S", false, "Generate A report in summary format")
-	rootCmd.PersistentFlags().BoolP("full-report", "F", false, "Generate A report with all chapters")
-	rootCmd.PersistentFlags().StringP("report-file-location", "", "", "File Location of the report")
- */
+type setupRunnerTestCast struct {
+	desc        string
+	baseConfig   *config.BaseConfig
+	shouldError bool
+}
 
 func TestSetupBaseConfig(t *testing.T) {
-	newCmd := new(cobra.Command)
-	newCmd.SetArgs([]string{
-		"--tenable-access-key", "tak",
-		"--tenable-secret-key", "tsk",
-		"--tenable-scan-id", "tsi",
-		"--include-gcloud",
-		"--gcloud-service-account-path", "/gsap",
-		"--gcloud-project", "gp",
-		"--include-aws",
-		"--generate-report",
-		"--low-severity",
-		"--medium-severity",
-		"--high-severity",
-		"--critical-severity",
-		"--filter-search-type", "and",
-		"--report-format", "pdf",
-		"--full-report",
-		"--report-file-location", "./rfl",
-	})
-	initCmd(newCmd)
-	baseConfig, err := setupBaseConfig(newCmd)
-	if err != nil {
-		t.Fatal(err)
+
+	boolFlags := []string{
+		"include-gcloud",
+		"include-aws",
+		"generate-report",
+		"low-severity",
+		"medium-severity",
+		"high-severity",
+		"critical-severity",
+		"full-report",
+		"summary-report",
 	}
 
-	assert.Equal(t, baseConfig.IncludeAWS, true)
-	assert.Equal(t, baseConfig.IncludeGCloud, true)
-	assert.Equal(t, baseConfig.GCloudConfig.ProjectName, "gp")
-	assert.Equal(t, baseConfig.GCloudConfig.ServiceAccountPath, "/gsap")
-	assert.Equal(t, baseConfig.TenableConfig.GenerateReport, true)
-	assert.Equal(t, baseConfig.TenableConfig.FilePath, "./rfl")
-	assert.Equal(t, baseConfig.TenableConfig.SearchType, "and")
-	assert.Equal(t, baseConfig.TenableConfig.ScanID, "tsi")
-	assert.Equal(t, baseConfig.TenableConfig.SecretKey, "tsk")
-	assert.Equal(t, baseConfig.TenableConfig.AccessKey, "tak")
-	assert.Equal(t, baseConfig.TenableConfig.Format, "pdf")
+	stringFlags := []string{
+	"tenable-access-key",
+	"tenable-secret-key",
+	"tenable-scan-id",
+	"gcloud-service-account-path",
+	"gcloud-project",
+	"filter-search-type",
+	"report-format",
+	"report-file-location"}
+	newCmd := NewRootCmd()
+
+	for _, f := range stringFlags {
+		if newCmd.Flags().Lookup(f) == nil {
+			t.Fatalf("generate command should have flag %s", f)
+		}
+		_, err := newCmd.Flags().GetString(f)
+		if err != nil {
+			t.Fatalf("Error: %s", err)
+		}
+	}
+
+	for _, f := range boolFlags {
+		if newCmd.Flags().Lookup(f) == nil {
+			t.Fatalf("generate command should have flag %s", f)
+		}
+		_, err := newCmd.Flags().GetBool(f)
+		if err != nil {
+			t.Fatalf("Error: %s", err)
+		}
+	}
 }
+
+type loggingPair struct {
+	loglevelFromFlag string
+	expectedLoglevel log.Level
+}
+
+//TODO: Add method of testing logging type
+func TestSetupLogging(t *testing.T) {
+
+	lp := []loggingPair{
+		{
+			loglevelFromFlag: "trace",
+			expectedLoglevel: log.TraceLevel,
+		},
+		{
+			loglevelFromFlag: "debug",
+			expectedLoglevel: log.DebugLevel,
+		},
+		{
+			loglevelFromFlag: "info",
+			expectedLoglevel: log.InfoLevel,
+		},
+		{
+			loglevelFromFlag: "panic",
+			expectedLoglevel: log.PanicLevel,
+		},
+		{
+			loglevelFromFlag: "fatal",
+			expectedLoglevel: log.FatalLevel,
+		},
+	}
+
+	lc := &logConfig{}
+
+	for _, logPair := range lp {
+		lc.LogLevel = logPair.loglevelFromFlag
+		err := setupLogging(lc)
+		if err != nil {
+			t.Fatalf("Error! %s", err)
+		}
+
+		if log.GetLevel() != logPair.expectedLoglevel {
+			t.Fatalf("Error! Log level not expected")
+		}
+	}
+}
+
+func TestSetupRunner(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+	testCases := []*setupRunnerTestCast {
+		{
+			desc: "It should fail when the config struct is empty.",
+			baseConfig: &config.BaseConfig{},
+			shouldError: true,
+		},
+		{
+			desc: "It should fail when the TenableConfig struct is nil.",
+			baseConfig: &config.BaseConfig{
+				GCloudConfig: &config.GCloudConfig{},
+			},
+			shouldError: true,
+		},
+		{
+			desc: "It should fail when the GCloudConfig struct is nil.",
+			baseConfig: &config.BaseConfig{
+				TenableConfig: &config.TenableConfig{},
+			},
+			shouldError: true,
+		},
+		{
+			desc: "It should fail when no Tenable credentials are set",
+			baseConfig: &config.BaseConfig{
+				GCloudConfig: &config.GCloudConfig{},
+				TenableConfig: &config.TenableConfig{},
+			},
+			shouldError: true,
+		},
+		{
+			desc: "It should fail when export report is set and no severity is set",
+			baseConfig: &config.BaseConfig{
+				GCloudConfig: &config.GCloudConfig{},
+				TenableConfig: &config.TenableConfig{
+					AccessKey: "ak",
+					SecretKey: "sk",
+					GenerateReport: true,
+				},
+			},
+			shouldError: true,
+		},
+		{
+			desc: "It should not fail when all of the required fields are set",
+			baseConfig: &config.BaseConfig{
+				GCloudConfig: &config.GCloudConfig{},
+				TenableConfig: &config.TenableConfig{
+					AccessKey: "ak",
+					SecretKey: "sk",
+					GenerateReport: true,
+					LowSeverity: true,
+				},
+			},
+			shouldError: false,
+		},
+		{
+			desc: "It should not fail when exporting a report is not set and is missing fields for exporting.",
+			baseConfig: &config.BaseConfig{
+				GCloudConfig: &config.GCloudConfig{},
+				TenableConfig: &config.TenableConfig{
+					AccessKey: "ak",
+					SecretKey: "sk",
+				},
+			},
+			shouldError: false,
+		},
+	}
+
+	for index, testCase := range testCases {
+		log.WithFields(log.Fields{
+			"desc": testCase.desc,
+			"shouldError": testCase.shouldError,
+		}).Debug("Starting testCase " + strconv.Itoa(index))
+
+		_, err := setupRunner(testCase.baseConfig)
+
+		log.WithFields(log.Fields{
+			"shouldError": testCase.shouldError,
+			"err": err,
+		}).Debug("Finished running testCase " + strconv.Itoa(index))
+
+		if testCase.shouldError {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+		}
+	}
+}
+// func setupRunner(baseConfig *config.BaseConfig) (*runner.Runner, error) {
+

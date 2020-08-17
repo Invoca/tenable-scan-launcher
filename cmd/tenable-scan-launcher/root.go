@@ -60,10 +60,12 @@ func NewRootCmd() *cobra.Command {
 	baseConfig := config.BaseConfig{}
 	tenableConfig := config.TenableConfig{}
 	gcloudConfig := config.GCloudConfig{}
+
 	baseConfig.TenableConfig = &tenableConfig
 	baseConfig.GCloudConfig = &gcloudConfig
 
 	logConfig := logConfig{}
+
 	cmd := &cobra.Command{
 		Use:   "tenable-scanner",
 		Short: "Gets IPs and launches scans",
@@ -149,12 +151,12 @@ func setupLogging(logConfig *logConfig) error {
 }
 
 func setupRunner(baseConfig *config.BaseConfig) (*runner.Runner, error) {
-	runner := &runner.Runner{}
+	runnerSvc := &runner.Runner{}
 
-	err := runner.SetupRunner(baseConfig)
+	err := runnerSvc.SetupRunner(baseConfig)
 	if err != nil {
 		return nil, fmt.Errorf("setupRunner: Error seting up runner %s", err)
 	}
 
-	return runner, nil
+	return runnerSvc, nil
 }
