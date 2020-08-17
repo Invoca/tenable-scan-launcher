@@ -7,9 +7,8 @@ import (
 )
 
 func main() {
-	log.SetLevel(log.DebugLevel)
-
-	err := Execute()
+	cmd := NewRootCmd()
+	err := cmd.Execute()
 	if err != nil {
 		log.Info(err)
 		os.Exit(1)
