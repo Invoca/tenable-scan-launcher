@@ -24,6 +24,10 @@ func (r *Runner) SetupRunner(config *config.BaseConfig) error {
 	r.includeAWS = config.IncludeAWS
 	r.includeGCloud = config.IncludeGCloud
 
+	if config.TenableConfig == nil {
+		return fmt.Errorf("SetupRunner: TenableConfig in config cannot be nil")
+	}
+
 	if r.includeAWS {
 		ec2Svc := &aws.AWSEc2{}
 		err := ec2Svc.Setup(config)
@@ -34,6 +38,9 @@ func (r *Runner) SetupRunner(config *config.BaseConfig) error {
 	}
 
 	if r.includeGCloud {
+		if config.GCloudConfig == nil {
+			return fmt.Errorf("SetupRunner: GCloudConfig in config cannot be nil")
+		}
 		r.gcloud = &gcloud.GCloud{}
 		err := r.gcloud.Setup(config)
 		if err != nil {
