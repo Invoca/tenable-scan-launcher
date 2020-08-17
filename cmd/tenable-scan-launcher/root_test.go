@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -57,7 +56,6 @@ func TestSetupBaseConfig(t *testing.T) {
 		"--full-report",
 		"--report-file-location", "./rfl",
 	})
-	fmt.Println("Here?")
 	initCmd(newCmd)
 	baseConfig, err := setupBaseConfig(newCmd)
 	if err != nil {

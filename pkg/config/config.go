@@ -13,6 +13,9 @@ type TenableConfig struct {
 	AccessKey string
 	SecretKey string
 	ScanID string
+	SummaryReport bool
+	FullReport bool
+
 }
 
 type GCloudConfig struct {
