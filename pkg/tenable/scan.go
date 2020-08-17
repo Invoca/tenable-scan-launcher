@@ -109,11 +109,15 @@ func (t *Tenable) SetTargets(targets []string) error {
 	return nil
 }
 
+// TODO: Add tests for setting up SeverityFilter and for chapters
 func SetupTenable(tenableConfig *config.TenableConfig) (*Tenable, error) {
 	var filters []*Filter
 	var err error
 
+	es := &ExportSettings{}
+
 	format := tenableConfig.Format
+	//TODO: Breakout into another function
 	if tenableConfig.GenerateReport {
 		// supported formats  are Nessus, HTML, PDF, CSV, or DB
 		if format != "nessus" && format != "html" && format != "pdf" && format != "csv" && format == "db" {
@@ -124,13 +128,20 @@ func SetupTenable(tenableConfig *config.TenableConfig) (*Tenable, error) {
 		if err != nil {
 			return nil, fmt.Errorf("SetupTenable: Error creating severityFilter")
 		}
-	}
-	es := &ExportSettings{
-		filter:     filters,
-		chapters:   tenableConfig.Chapters,
-		searchType: tenableConfig.SearchType,
-		format:     tenableConfig.Format,
-		filePath:   tenableConfig.FilePath,
+		chapters := tenableConfig.Chapters
+		if tenableConfig.SummaryReport == true {
+			chapters = "vuln_hosts_summary"
+		}
+		if tenableConfig.FullReport == true {
+			chapters = "vuln_hosts_summary; vuln_by_host; compliance_exec; remediations; vuln_by_plugin; compliance"
+		}
+		es = &ExportSettings{
+			filter:     	filters,
+			chapters:   chapters,
+			searchType: tenableConfig.SearchType,
+			format:     tenableConfig.Format,
+			filePath:   	tenableConfig.FilePath,
+		}
 	}
 	t := &Tenable{
 		accessKey:  tenableConfig.AccessKey,

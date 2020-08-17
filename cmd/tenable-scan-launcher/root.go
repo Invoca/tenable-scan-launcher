@@ -51,23 +51,31 @@ import (
 
 */
 
+type logConfig struct {
+	LogLevel string
+	LogType string
+}
+
 func NewRootCmd() *cobra.Command {
+	baseConfig := config.BaseConfig{}
+	tenableConfig := config.TenableConfig{}
+	gcloudConfig := config.GCloudConfig{}
+	baseConfig.TenableConfig = &tenableConfig
+	baseConfig.GCloudConfig = &gcloudConfig
+
+	logConfig := logConfig{}
 	cmd := &cobra.Command{
 		Use:   "tenable-scanner",
 		Short: "Gets IPs and launches scans",
 		Long: `tenable-scanner collects ip address from Google Cloud and AWS and launches a scan on the ips of the 
 instances given based on the scanner id. It is also able to export the scans and downloads them`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
-			return setupLogging(cmd)
+			return setupLogging(&logConfig)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			log.Debug("Setting up runner")
-			baseConfig, err := setupBaseConfig(cmd)
-			if err != nil {
-				return fmt.Errorf("RunE: Error seting up BaseConfig %s", err)
-			}
 
-			runnerSvc, err := setupRunner(baseConfig)
+			runnerSvc, err := setupRunner(&baseConfig)
 			if err != nil {
 				return fmt.Errorf("RunE: Error seting up runner %s", err)
 			}
@@ -80,7 +88,36 @@ instances given based on the scanner id. It is also able to export the scans and
 			return nil
 		},
 	}
-	initCmd(cmd)
+
+	f := cmd.Flags()
+	f.StringVarP(&logConfig.LogLevel,"log-level", "", "", "Log level (trace,info,fatal,panic,warn, debug) default is debug")
+	f.StringVarP(&logConfig.LogType, "log-type", "", "", "Log type (text,json)")
+
+	f.StringVarP(&baseConfig.TenableConfig.AccessKey, "tenable-access-key", "a", "", "tenable access key")
+	f.StringVarP(&baseConfig.TenableConfig.SecretKey, "tenable-secret-key", "s", "", "tenable secret key")
+	f.StringVarP(&baseConfig.TenableConfig.ScanID, "tenable-scan-id", "i", "", "tenable scanID")
+
+
+	f.BoolVarP(&baseConfig.IncludeGCloud, "include-gcloud", "g",false, "Include Google Cloud Instances In Report")
+	f.StringVarP(&baseConfig.GCloudConfig.ServiceAccountPath ,"gcloud-service-account-path", "", "", "Path of service account token. Uses default if not specified")
+	f.StringVarP(&baseConfig.GCloudConfig.ProjectName, "gcloud-project", "p", "", "GCloud project to list instances from")
+
+	f.BoolVarP(&baseConfig.IncludeAWS, "include-aws", "A", false, "Include AWS Instances In Report")
+
+
+	f.BoolVarP(&baseConfig.TenableConfig.GenerateReport, "generate-report", "R", false, "Generate A report after the scan is complete")
+	f.BoolVarP(&baseConfig.TenableConfig.LowSeverity, "low-severity", "L", false, "Add Low Severity To Report")
+	f.BoolVarP(&baseConfig.TenableConfig.MediumSeverity, "medium-severity", "M", false, "Add Medium Severity To Report")
+	f.BoolVarP(&baseConfig.TenableConfig.HighSeverity, "high-severity", "H", false, "Add High Severity To Report")
+	f.BoolVarP(&baseConfig.TenableConfig.CriticalSeverity, "critical-severity", "C", false, "Add Critical Severity To Report")
+
+	f.StringVarP(&baseConfig.TenableConfig.SearchType, "filter-search-type", "", "", "Search type to use in report. Only (and, or) are supported")
+	f.StringVarP(&baseConfig.TenableConfig.Format, "report-format", "", "", "Report Format of the scan. Support formats are Nessus, HTML, PDF, CSV, or DB")
+	f.StringVarP(&baseConfig.TenableConfig.Chapters, "report-chapters", "", "", "Chapters to include in the report")
+	f.BoolVarP(&baseConfig.TenableConfig.SummaryReport, "summary-report", "S", false, "Generate A report in summary format")
+	f.BoolVarP(&baseConfig.TenableConfig.FullReport, "full-report", "F", false, "Generate A report with all chapters")
+	f.StringVarP(&baseConfig.TenableConfig.FilePath, "report-file-location", "", "", "File Location of the report")
+
 	return cmd
 }
 
@@ -115,18 +152,9 @@ func initCmd(rootCmd *cobra.Command) {
 }
 
 
-func setupLogging(cmd *cobra.Command) error {
-	logLevel, err  := cmd.Flags().GetString("log-level")
-	if err != nil {
-		return fmt.Errorf("setupLogging: error getting flag log-level")
-	}
+func setupLogging(logConfig *logConfig) error {
 
-	logType, err  := cmd.Flags().GetString("log-type")
-	if err != nil {
-		return fmt.Errorf("setupLogging: error getting flag log-type")
-	}
-
-	if logType == "json" {
+	if logConfig.LogType == "json" {
 		log.SetFormatter(&log.JSONFormatter{})
 	} else {
 		log.SetFormatter(&log.TextFormatter{
@@ -135,210 +163,20 @@ func setupLogging(cmd *cobra.Command) error {
 		})
 	}
 
-	if logLevel == "debug" {
+	if logConfig.LogLevel == "debug" {
 		log.SetLevel(log.DebugLevel)
-	} else if logLevel == "info" {
+	} else if logConfig.LogLevel == "info" {
 		log.SetLevel(log.InfoLevel)
-	} else if logLevel == "panic" {
+	} else if logConfig.LogLevel == "panic" {
 		log.SetLevel(log.PanicLevel)
-	} else if logLevel == "fatal" {
+	} else if logConfig.LogLevel == "fatal" {
 		log.SetLevel(log.FatalLevel)
-	} else if logLevel == "trace" {
+	} else if logConfig.LogLevel == "trace" {
 		log.SetLevel(log.TraceLevel)
 	} else  {
 		log.SetLevel(log.WarnLevel)
 	}
 	return nil
-}
-
-func setupTenableExport(cmd *cobra.Command, tenableConfig *config.TenableConfig) error {
-	lowSeverity, err := cmd.Flags().GetBool("low-severity")
-	if err != nil {
-		return fmt.Errorf("setupTenableExport: error getting flag low-severity")
-	}
-
-	mediumSeverity, err := cmd.Flags().GetBool("medium-severity")
-	if err != nil {
-		return fmt.Errorf("setupTenableExport: error getting flag medium-severity")
-	}
-
-	highSeverity, err := cmd.Flags().GetBool("high-severity")
-	if err != nil {
-		return fmt.Errorf("setupTenableExport: error getting flag high-severity")
-	}
-
-	criticalSeverity, err := cmd.Flags().GetBool("critical-severity")
-	if err != nil {
-		return fmt.Errorf("setupTenableExport: error getting flag critical-severity")
-	}
-
-	fullReport, err := cmd.Flags().GetBool("full-report")
-	if err != nil {
-		return fmt.Errorf("setupTenableExport: error getting flag full-report")
-	}
-
-	summaryReport, err  := cmd.Flags().GetBool("summary-report")
-	if err != nil {
-		return fmt.Errorf("setupTenableExport: error getting flag summary-report")
-	}
-
-	searchType, err := cmd.Flags().GetString("filter-search-type")
-	if err != nil {
-		return fmt.Errorf("setupTenableExport: error getting flag filter-search-type")
-	}
-
-	format, err := cmd.Flags().GetString("report-format")
-	if err != nil {
-		return fmt.Errorf("setupTenableExport: error getting flag report-format")
-	}
-
-	chapters, err  := cmd.Flags().GetString("report-chapters")
-	if err != nil {
-		return fmt.Errorf("setupTenableExport: error getting flag report-chapters")
-	}
-
-	filePath, err  := cmd.Flags().GetString("report-file-location")
-	if err != nil {
-		return fmt.Errorf("setupTenableExport: error getting flag report-file-location")
-	}
-
-	if summaryReport {
-		chapters = "vuln_hosts_summary"
-	}
-
-	if fullReport {
-		chapters = "vuln_hosts_summary; vuln_by_host; compliance_exec; remediations; vuln_by_plugin; compliance"
-	}
-
-	if searchType == "" {
-		return fmt.Errorf("setupTenable: filter-search-type cannot be nil")
-	}
-	if format == "" {
-		return fmt.Errorf("setupTenable: format cannot be nil")
-	}
-	if chapters == "" {
-		return fmt.Errorf("setupTenable: chapters cannot be nil")
-	}
-	if filePath == "" {
-		return fmt.Errorf("setupTenable: filePath cannot be nil")
-	}
-
-	tenableConfig.LowSeverity = lowSeverity
-	tenableConfig.MediumSeverity = mediumSeverity
-	tenableConfig.HighSeverity = highSeverity
-	tenableConfig.CriticalSeverity = criticalSeverity
-	tenableConfig.SearchType = searchType
-	tenableConfig.Format = format
-	tenableConfig.Chapters = chapters
-	tenableConfig.FilePath = filePath
-
-	return nil
-
-}
-
-func setupTenable(cmd *cobra.Command) (*config.TenableConfig, error) {
-	var err error
-
-	tenableConfig := new(config.TenableConfig)
-
-	accessKey, err := cmd.Flags().GetString("tenable-access-key")
-	if err != nil {
-		return nil, fmt.Errorf("setupTenable: error getting flag tenable-access-key")
-	}
-
-	secretKey, err := cmd.Flags().GetString("tenable-secret-key")
-	if err != nil {
-		return nil, fmt.Errorf("setupTenable: error getting flag tenable-secret-key")
-	}
-
-	scanID, err := cmd.Flags().GetString("tenable-scan-id")
-	if err != nil {
-		return nil, fmt.Errorf("setupTenable: error getting flag tenable-scan-id")
-	}
-
-	generateReport, err := cmd.Flags().GetBool("generate-report")
-	if err != nil {
-		return nil, fmt.Errorf("setupTenable: error getting flag generate-report")
-	}
-
-	if accessKey == "" {
-		return nil, fmt.Errorf("setupTenable: accessKey cannot be nil")
-	}
-	if secretKey == "" {
-		return nil, fmt.Errorf("setupTenable: secretKey cannot be nil")
-	}
-	if scanID == "" {
-		return nil, fmt.Errorf("setupTenable: scanID cannot be nil")
-	}
-
-	log.Debug("setupTenableExport")
-	if generateReport {
-		err = setupTenableExport(cmd, tenableConfig)
-		if err != nil {
-			return nil, fmt.Errorf("setupTenable: Error creating Tenable Export Settings %s", err)
-		}
-	}
-
-	tenableConfig.AccessKey = accessKey
-	tenableConfig.SecretKey = secretKey
-	tenableConfig.ScanID = scanID
-	tenableConfig.GenerateReport = generateReport
-
-	return tenableConfig, nil
-}
-
-func setupGCloud(cmd *cobra.Command) (*config.GCloudConfig, error) {
-	serviceAccountPath, err := cmd.Flags().GetString("gcloud-service-account-path")
-	if err != nil {
-		return nil, fmt.Errorf("setupGCloud: error getting flag gcloud-service-account-path")
-	}
-
-	gcloudProject, err := cmd.Flags().GetString("gcloud-project")
-	if err != nil {
-		return nil, fmt.Errorf("setupGCloud: error getting flag gcloud-project")
-	}
-
-	gcloudConfig := &config.GCloudConfig{
-		ServiceAccountPath: serviceAccountPath,
-		ProjectName: gcloudProject,
-	}
-
-	return gcloudConfig, nil
-}
-
-func setupBaseConfig(cmd *cobra.Command) (*config.BaseConfig, error) {
-	baseConfig := new(config.BaseConfig)
-
-	includeGCloud, err := cmd.Flags().GetBool("include-gcloud")
-	if err != nil {
-		return nil, fmt.Errorf("setupRunner: error getting flag include-gcloud")
-	}
-
-	includeAWS, err := cmd.Flags().GetBool("include-aws")
-	if err != nil {
-		return nil, fmt.Errorf("setupRunner: error getting flag include-aws")
-	}
-
-	baseConfig.IncludeAWS = includeAWS
-	baseConfig.IncludeGCloud = includeGCloud
-
-	log.Debug("Setting up Tenable Config")
-	tenableConfig, err := setupTenable(cmd)
-	if err != nil {
-		return nil, fmt.Errorf("setupRunner: Error seting up tenableClient %s", err)
-	}
-
-	baseConfig.TenableConfig = tenableConfig
-
-	if includeGCloud {
-		log.Debug("Setting up GCloud Config")
-		gCloudConfig, err := setupGCloud(cmd)
-		if err != nil {
-			return nil, fmt.Errorf("setupRunner: Error seting up GCloud %s", err)
-		}
-		baseConfig.GCloudConfig = gCloudConfig
-	}
-	return baseConfig, nil
 }
 
 func setupRunner(baseConfig *config.BaseConfig) (*runner.Runner, error) {
