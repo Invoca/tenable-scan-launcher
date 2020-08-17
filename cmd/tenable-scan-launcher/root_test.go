@@ -37,23 +37,16 @@ import (
 	rootCmd.PersistentFlags().StringP("report-file-location", "", "", "File Location of the report")
  */
 
-
-var(
-	logLevel = []string{"s"}
-)
-
 func TestSetupBaseConfig(t *testing.T) {
 	newCmd := new(cobra.Command)
-	initCmd(newCmd)
-	cmd := NewRootCmd()
 	newCmd.SetArgs([]string{
 		"--tenable-access-key", "tak",
 		"--tenable-secret-key", "tsk",
 		"--tenable-scan-id", "tsi",
-//		"--include-gcloud",
+		"--include-gcloud",
 		"--gcloud-service-account-path", "/gsap",
 		"--gcloud-project", "gp",
-//		"--include-aws",
+		"--include-aws",
 		"--generate-report",
 		"--low-severity",
 		"--medium-severity",
@@ -61,11 +54,12 @@ func TestSetupBaseConfig(t *testing.T) {
 		"--critical-severity",
 		"--filter-search-type", "and",
 		"--report-format", "pdf",
-//		"--full-report",
+		"--full-report",
 		"--report-file-location", "./rfl",
 	})
 	fmt.Println("Here?")
-	baseConfig, err := setupBaseConfig(cmd)
+	initCmd(newCmd)
+	baseConfig, err := setupBaseConfig(newCmd)
 	if err != nil {
 		t.Fatal(err)
 	}
