@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
+	"github.com/spf13/afero"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -102,6 +103,7 @@ type Tenable struct {
 	status			*scanStatus
 	export 			*ExportSettings
 	generateReport 	bool
+	osFs 			afero.Fs
 }
 
 func (t *Tenable) SetTargets(targets []string) error {
@@ -159,6 +161,7 @@ func SetupTenable(tenableConfig *config.TenableConfig) (*Tenable, error) {
 		},
 		export:     es,
 		generateReport: tenableConfig.GenerateReport,
+		osFs: afero.NewOsFs(),
 	}
 	return t, nil
 }
@@ -505,13 +508,22 @@ func (t *Tenable) DownloadExport() error {
 		return fmt.Errorf("DownloadExport: Error making request %s", err)
 	}
 
-	err = ioutil.WriteFile(t.export.filePath, body, 0777)
-	if err != nil {
-		return fmt.Errorf("DownloadExport: Writing to file %s", err)
-	}
-	log.Debug("Completed Writing to file")
 
+	f, err := t.osFs.Create(t.export.filePath)
+	if err != nil {
+		return fmt.Errorf("DownloadExport: Error creating file %s", err)
+	}
+
+	defer f.Close()
+
+	_, err = f.Write(body)
+	if err != nil {
+		return fmt.Errorf("DownloadExport: Error writing to file %s", err)
+	}
+
+	log.Debug("Report written to file")
 
 	return nil
 
 }
+

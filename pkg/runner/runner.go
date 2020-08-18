@@ -138,14 +138,14 @@ func (r *Runner) getIPs() error {
 	}
 
 	// targets is just for testing to make the scan go quicker
-	/*
+
 	var targets []string
 
 	target1 := "127.0.0.1"
 	targets = append(targets, target1)
 
 	r.tenable.SetTargets(targets)
-	 */
+
 
 	err := r.tenable.SetTargets(ips)
 
