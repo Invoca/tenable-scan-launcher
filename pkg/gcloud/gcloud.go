@@ -20,7 +20,7 @@ type GCloud struct {
 }
 
 func (g *GCloud) Setup(config *config.BaseConfig) error {
-	wrapper, err := CreateGCloudInterface(config)
+	wrapper, err := createGCloudInterface(config)
 	if err != nil {
 		return fmt.Errorf("Setup: Error Creating GCloud Interface")
 	}
@@ -31,7 +31,7 @@ func (g *GCloud) Setup(config *config.BaseConfig) error {
 	return nil
 }
 
-func CreateGCloudInterface(baseConfig *config.BaseConfig) (*GCloudWrapper, error) {
+func createGCloudInterface(baseConfig *config.BaseConfig) (*GCloudWrapper, error) {
 	option := option.WithCredentialsFile(baseConfig.GCloudConfig.ServiceAccountPath)
 
 	computeService, err := compute.NewService(context.Background(), option)
