@@ -109,15 +109,17 @@ func (t *Tenable) SetTargets(targets []string) error {
 	return nil
 }
 
-// TODO: Add tests for setting up SeverityFilter and for chapters
 func SetupTenable(tenableConfig *config.TenableConfig) (*Tenable, error) {
 	var filters []*Filter
 	var err error
 
+	if tenableConfig.SecretKey == "" || tenableConfig.AccessKey == "" {
+		return nil, fmt.Errorf("SetupTenable: Cannot have empty secret or access keys")
+	}
+
 	es := &ExportSettings{}
 
 	format := tenableConfig.Format
-	//TODO: Breakout into another function
 	if tenableConfig.GenerateReport {
 		// supported formats  are Nessus, HTML, PDF, CSV, or DB
 		if format != "nessus" && format != "html" && format != "pdf" && format != "csv" && format == "db" {

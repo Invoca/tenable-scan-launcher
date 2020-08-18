@@ -1,6 +1,7 @@
 package tenable
 
 import (
+	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -42,6 +43,67 @@ func setupTenable(t *testing.T, tenable *Tenable, requestBodies [][]byte, return
 	return tenable, server
 }
 
+func TestSetupTenable(t *testing.T) {
+	log.SetLevel(log.DebugLevel)
+
+	tc := &config.TenableConfig{}
+
+	testCases := []testCase{
+		{
+			desc: "Should fail when Aceess Key and Secret Key are not set",
+			setup: func() {
+				tc.AccessKey = ""
+				tc.SecretKey = ""
+			},
+			shouldError:  true,
+		},
+		{
+			desc: "Should fail when no severity levels are specified when creating a report",
+			setup: func() {
+				tc.AccessKey = "ak"
+				tc.SecretKey = "sk"
+				tc.GenerateReport = true
+			},
+			shouldError:  true,
+		},
+		{
+			desc: "Should not fail when no required export settings are set and Generate Report is set to false",
+			setup: func() {
+				tc.AccessKey = "ak"
+				tc.SecretKey = "sk"
+				tc.GenerateReport = false
+			},
+			shouldError:  false,
+		},
+		{
+			desc: "Should not fail GenerateReport is set to true and all required fields are passed to it",
+			setup: func() {
+				tc.AccessKey = "ak"
+				tc.SecretKey = "sk"
+				tc.GenerateReport = true
+				tc.LowSeverity = true
+			},
+			shouldError:  false,
+		},
+	}
+	for index, testCase := range testCases {
+		log.WithFields(log.Fields{
+			"desc": testCase.desc,
+			"shouldError": testCase.shouldError,
+			"expectedPath": testCase.expectedPath,
+		}).Debug("Starting testCase " + strconv.Itoa(index))
+
+		testCase.setup()
+
+		_,  err := SetupTenable(tc)
+
+		if testCase.shouldError {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+		}
+	}
+}
 
 func TestLaunchScan(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
@@ -274,6 +336,7 @@ func TestStartExport(t *testing.T) {
 			format: "pdf",
 			chapters: "vuln_hosts_summary",
 		},
+		generateReport: true,
 	}
 
 	statusPath := "/scans/" + scanID + "/export"
@@ -472,6 +535,10 @@ func TestDownloadExport(t *testing.T) {
 		scanID:     scanID,
 		scanUuid: scanUuid,
 		fileId: fileId,
+		generateReport: true,
+		export: &ExportSettings{
+			filePath: "./blah",
+		},
 	}
 
 	statusPath := "/scans/" + scanID + "/export/" + fileId + "/download"
