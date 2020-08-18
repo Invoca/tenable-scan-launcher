@@ -8,6 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"strconv"
 	"testing"
 )
 
@@ -68,8 +69,12 @@ func TestGetAWSInstances(t *testing.T) {
 		},
 	}
 
-	for _, testCase := range testCases {
-		t.Logf("TestGetAWSInstances: %s", testCase.desc)
+	for index, testCase := range testCases {
+		log.WithFields(log.Fields{
+			"desc": testCase.desc,
+			"shouldError": testCase.shouldError,
+		}).Debug("Starting testCase " + strconv.Itoa(index))
+
 		testCase.setup()
 
 

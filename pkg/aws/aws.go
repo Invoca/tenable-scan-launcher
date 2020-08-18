@@ -32,7 +32,6 @@ func (m *AWSEc2)  Setup(config *config.BaseConfig) error {
 	return nil
 }
 
-// GetAWSIPs
 func (m *AWSEc2) GatherIPs() ([]string, error) {
 	log.Debug("Getting AWS IPs")
 
