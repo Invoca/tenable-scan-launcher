@@ -3,6 +3,7 @@ package tenable
 import (
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -539,6 +540,7 @@ func TestDownloadExport(t *testing.T) {
 		export: &ExportSettings{
 			filePath: "./blah",
 		},
+		osFs: afero.NewMemMapFs(),
 	}
 
 	statusPath := "/scans/" + scanID + "/export/" + fileId + "/download"
