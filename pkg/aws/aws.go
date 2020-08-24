@@ -23,10 +23,7 @@ func (m *AWSEc2) Setup(config *config.BaseConfig) error {
 	sess := session.Must(session.NewSessionWithOptions(session.Options{
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	if sess == nil {
-		return fmt.Errorf("setupAWS: Error creating session object")
-	}
-	m.IPs = *new([]string)
+
 	m.Ec2svc = ec2.New(sess)
 	return nil
 }
@@ -38,7 +35,7 @@ func (m *AWSEc2) GatherIPs() ([]string, error) {
 		return nil, fmt.Errorf("GetAWSIPs: Ec2svc object is nil")
 	}
 
-	instances, err := m.getInstances(m.Ec2svc)
+	instances, err := m.getInstances()
 	if err != nil {
 		return nil, fmt.Errorf("GetAWSIPs: Could not get list of instances %s", err)
 	}
@@ -51,14 +48,14 @@ func (m *AWSEc2) GatherIPs() ([]string, error) {
 	return m.IPs, nil
 }
 
-func (m *AWSEc2) getInstances(ec2Svc ec2iface.EC2API) ([]*ec2.Reservation, error) {
+func (m *AWSEc2) getInstances() ([]*ec2.Reservation, error) {
 
-	if ec2Svc == nil {
+	if m.Ec2svc == nil {
 		return nil, fmt.Errorf("getInstances: Passed empty ec2iface object")
 	}
 
 	// Describe instances. We can add filter flags later if needed
-	resp, err := ec2Svc.DescribeInstances(nil)
+	resp, err := m.Ec2svc.DescribeInstances(nil)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error listing instances %s", err)

@@ -77,8 +77,9 @@ func TestGetAWSInstances(t *testing.T) {
 		testCase.setup()
 
 		ec2api := AWSEc2{}
+		ec2api.Ec2svc = mockEc2
 
-		_, err := ec2api.getInstances(mockEc2)
+		_, err := ec2api.getInstances()
 
 		mockEc2.AssertExpectations(t)
 
@@ -92,7 +93,7 @@ func TestGetAWSInstances(t *testing.T) {
 	t.Logf("TestGetAWSInstances: pass nil object to getInstances")
 
 	ec2api := AWSEc2{}
-	_, err := ec2api.getInstances(nil)
+	_, err := ec2api.getInstances()
 	assert.Error(t, err)
 
 }

@@ -36,27 +36,34 @@ func TestSetupBaseConfig(t *testing.T) {
 		"gcloud-project",
 		"filter-search-type",
 		"report-format",
-		"report-file-location"}
+		"report-file-location",
+	}
+
+	intFlags := []string{
+		"concurrency",
+	}
+
 	newCmd := NewRootCmd()
 
 	for _, f := range stringFlags {
-		if newCmd.Flags().Lookup(f) == nil {
-			t.Fatalf("generate command should have flag %s", f)
-		}
+
+		assert.NotNilf(t, newCmd.Flags().Lookup(f), "generate command should have flag %s, but was nil", f)
 		_, err := newCmd.Flags().GetString(f)
-		if err != nil {
-			t.Fatalf("Error: %s", err)
-		}
+		assert.NoError(t, err)
 	}
 
 	for _, f := range boolFlags {
-		if newCmd.Flags().Lookup(f) == nil {
-			t.Fatalf("generate command should have flag %s", f)
-		}
+		assert.NotNilf(t, newCmd.Flags().Lookup(f), "generate command should have flag %s, but was nil", f)
+
 		_, err := newCmd.Flags().GetBool(f)
-		if err != nil {
-			t.Fatalf("Error: %s", err)
-		}
+		assert.NoError(t, err)
+	}
+
+	for _, f := range intFlags {
+		assert.NotNilf(t, newCmd.Flags().Lookup(f), "generate command should have flag %s, but was nil", f)
+
+		_, err := newCmd.Flags().GetInt(f)
+		assert.NoError(t, err)
 	}
 }
 
@@ -101,7 +108,7 @@ func TestSetupLogging(t *testing.T) {
 		}
 
 		if log.GetLevel() != logPair.expectedLoglevel {
-			t.Fatalf("Error! Log level not expected")
+			t.Errorf("Error! Log level not expected. Got " + string(log.GetLevel()) + " Expected: " + string(logPair.expectedLoglevel))
 		}
 	}
 }

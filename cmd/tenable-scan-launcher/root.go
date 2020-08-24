@@ -83,8 +83,7 @@ instances given based on the scanner id. It is also able to export the scans and
 			}
 
 			log.Debug("Setup completed. Running command")
-			err = runnerSvc.Run()
-			if err != nil {
+			if err := runnerSvc.Run(); err != nil {
 				return fmt.Errorf("RunE: Error running runner %s", err)
 			}
 			return nil
@@ -118,6 +117,7 @@ instances given based on the scanner id. It is also able to export the scans and
 	f.BoolVarP(&baseConfig.TenableConfig.FullReport, "full-report", "F", false, "Generate A report with all chapters")
 	f.StringVarP(&baseConfig.TenableConfig.FilePath, "report-file-location", "", "", "File Location of the report")
 
+	f.IntVarP(&baseConfig.GCloudConfig.Concurrency, "concurrency", "", 0, "Number of concurrent goroutines")
 	return cmd
 }
 

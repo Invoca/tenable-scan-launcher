@@ -14,26 +14,26 @@ import (
 type GCloud struct {
 	IPs            []string
 	computeService wrapper.GCloudWrapper
-	regions        *[]string
+	regions        []string
 	mux            sync.Mutex
+	concurrency    int
 }
 
 func (g *GCloud) Setup(config *config.BaseConfig) error {
-	wrapper, err := createGCloudInterface(config)
+	GCloudwrapper, err := createGCloudInterface(config)
 	if err != nil {
 		return fmt.Errorf("Setup: Error Creating GCloud Interface")
 	}
 
-	g.computeService = wrapper
-	g.IPs = *new([]string)
-
+	g.computeService = GCloudwrapper
+	g.concurrency = config.GCloudConfig.Concurrency
 	return nil
 }
 
 func createGCloudInterface(baseConfig *config.BaseConfig) (*GCloudWrapper, error) {
-	option := option.WithCredentialsFile(baseConfig.GCloudConfig.ServiceAccountPath)
+	options := option.WithCredentialsFile(baseConfig.GCloudConfig.ServiceAccountPath)
 
-	computeService, err := compute.NewService(context.Background(), option)
+	computeService, err := compute.NewService(context.Background(), options)
 	if err != nil {
 		return nil, fmt.Errorf("SetupRunner: Error getting compute.Service object %s", err)
 	}
@@ -46,7 +46,7 @@ func createGCloudInterface(baseConfig *config.BaseConfig) (*GCloudWrapper, error
 }
 
 func (g *GCloud) SetupGCloud(computeService wrapper.GCloudWrapper) error {
-	if &computeService == nil {
+	if computeService == nil {
 		return fmt.Errorf("SetupGCloud: computeService cannot be nil")
 	}
 
@@ -61,19 +61,21 @@ func (g *GCloud) getAllRegionsForProject() error {
 		return fmt.Errorf("getAllRegionsForProject: Error Getting Zones %s", err)
 	}
 
-	g.regions = &regions
+	g.regions = regions
 	return nil
 }
 
-func (g *GCloud) addIPsToStruct(ips []string) {
+func (g *GCloud) storeIPs(ips []string) {
 	g.mux.Lock()
 	g.IPs = append(g.IPs, ips...)
 	g.mux.Unlock()
 }
 
-func (g *GCloud) getInstancesInRegion(region string) error {
-	if &region == nil {
-		return fmt.Errorf("getInstancesInRegion: region cannot be nil")
+func (g *GCloud) getInstancesInRegion(region string, wg *sync.WaitGroup) error {
+	defer wg.Done()
+
+	if region == "" {
+		return fmt.Errorf("getInstancesInRegion: region cannot be empty")
 	}
 
 	log.Debug(region)
@@ -86,15 +88,17 @@ func (g *GCloud) getInstancesInRegion(region string) error {
 
 	log.Debug("getInstancesInRegion: ", privateIps)
 
-	g.addIPsToStruct(privateIps)
+	g.storeIPs(privateIps)
 	return nil
 }
 
 // GetGCloudIPs
 func (g *GCloud) GatherIPs() ([]string, error) {
+	var wg sync.WaitGroup
+	concurrency := 5
 	log.Debug("Getting IPs from Google Cloud")
 
-	if &g.computeService == nil {
+	if g.computeService == nil {
 		return nil, fmt.Errorf("getAllRegionsForProject: computeService cannot be nil")
 	}
 
@@ -103,13 +107,21 @@ func (g *GCloud) GatherIPs() ([]string, error) {
 		return nil, fmt.Errorf("GatherIPs: Error getting regions. %s", err)
 	}
 
-	if &g.regions == nil {
+	if g.regions == nil {
 		return nil, fmt.Errorf("getAllRegionsForProject: regions cannot be nil")
 	}
 
-	for _, region := range *g.regions {
-		go g.getInstancesInRegion(region)
+	for index, region := range g.regions {
+		wg.Add(1)
+		go g.getInstancesInRegion(region, &wg)
+
+		// Wait to create more threads until the number concurrent threads returns
+		if index > 0 && (index%concurrency) == 0 {
+			wg.Wait()
+		}
 	}
+
+	wg.Wait()
 
 	return g.IPs, nil
 }
@@ -124,15 +136,15 @@ func newCloudWrapper(computeService *compute.Service, project string) (*GCloudWr
 		return nil, fmt.Errorf("NewCloudWrapper: computeService cannot be nil")
 	}
 
-	if &project == nil {
-		return nil, fmt.Errorf("NewCloudWrapper: project cannot be nil")
+	if project == "" {
+		return nil, fmt.Errorf("NewCloudWrapper: project cannot be empty")
 	}
 
 	return &GCloudWrapper{computeService: computeService, project: project}, nil
 }
 
 func (g *GCloudWrapper) Zones() ([]string, error) {
-	regionNames := *new([]string)
+	var regionNames []string
 	listRegions := g.computeService.Zones.List(g.project)
 	regions, err := listRegions.Do()
 
@@ -152,12 +164,11 @@ func (g *GCloudWrapper) Zones() ([]string, error) {
 }
 
 func (g *GCloudWrapper) InstancesIPsInRegion(region string) ([]string, error) {
-	if &region == nil {
+	if region == "" {
 		return nil, fmt.Errorf("InstancesIPsInRegion: region cannot be nil")
 	}
 
 	var privateIps []string
-	fmt.Println(region)
 
 	listInstances := g.computeService.Instances.List(g.project, region)
 
@@ -170,9 +181,7 @@ func (g *GCloudWrapper) InstancesIPsInRegion(region string) ([]string, error) {
 	for _, resItem := range resList.Items {
 		fmt.Println(resItem.Name)
 		for _, device := range resItem.NetworkInterfaces {
-			deviceIP := device.NetworkIP
-			fmt.Println(device.NetworkIP)
-			privateIps = append(privateIps, deviceIP)
+			privateIps = append(privateIps, device.NetworkIP)
 		}
 	}
 	return privateIps, nil
