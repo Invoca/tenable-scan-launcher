@@ -12,17 +12,17 @@ import (
 )
 
 type testCase struct {
-	desc        string
-	setup       func()
-	shouldError bool
-	expectedPath string
-	returnError bool
+	desc          string
+	setup         func()
+	shouldError   bool
+	expectedPath  string
+	returnError   bool
 	requestBodies [][]byte
 }
 
 func setupTenable(t *testing.T, tenable *Tenable, requestBodies [][]byte, returnError bool, expectedPath string) (*Tenable, *httptest.Server) {
 	counter := 0
-	apiKeyFormat := "accessKey=" + tenable.accessKey + "; secretKey=" +  tenable.secretKey + ";"
+	apiKeyFormat := "accessKey=" + tenable.accessKey + "; secretKey=" + tenable.secretKey + ";"
 
 	server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		if returnError {
@@ -56,7 +56,7 @@ func TestSetupTenable(t *testing.T) {
 				tc.AccessKey = ""
 				tc.SecretKey = ""
 			},
-			shouldError:  true,
+			shouldError: true,
 		},
 		{
 			desc: "Should fail when no severity levels are specified when creating a report",
@@ -65,7 +65,7 @@ func TestSetupTenable(t *testing.T) {
 				tc.SecretKey = "sk"
 				tc.GenerateReport = true
 			},
-			shouldError:  true,
+			shouldError: true,
 		},
 		{
 			desc: "Should not fail when no required export settings are set and Generate Report is set to false",
@@ -74,7 +74,7 @@ func TestSetupTenable(t *testing.T) {
 				tc.SecretKey = "sk"
 				tc.GenerateReport = false
 			},
-			shouldError:  false,
+			shouldError: false,
 		},
 		{
 			desc: "Should not fail GenerateReport is set to true and all required fields are passed to it",
@@ -84,19 +84,19 @@ func TestSetupTenable(t *testing.T) {
 				tc.GenerateReport = true
 				tc.LowSeverity = true
 			},
-			shouldError:  false,
+			shouldError: false,
 		},
 	}
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
-			"shouldError": testCase.shouldError,
+			"desc":         testCase.desc,
+			"shouldError":  testCase.shouldError,
 			"expectedPath": testCase.expectedPath,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
 
-		_,  err := SetupTenable(tc)
+		_, err := SetupTenable(tc)
 
 		if testCase.shouldError {
 			assert.Error(t, err)
@@ -111,17 +111,17 @@ func TestLaunchScan(t *testing.T) {
 
 	accessKey := "access"
 	secretKey := "secret"
-	scanID	  := "123"
-	scanUuid  := "scanUuid"
+	scanID := "123"
+	scanUuid := "scanUuid"
 
 	tenable := Tenable{
-		accessKey:  accessKey,
-		secretKey:  secretKey,
-		Targets:    nil,
-		scanID:     scanID,
+		accessKey: accessKey,
+		secretKey: secretKey,
+		Targets:   nil,
+		scanID:    scanID,
 		status: &scanStatus{
-			Pending:   false,
-			Running:   false,
+			Pending: false,
+			Running: false,
 		},
 		scanUuid: scanUuid,
 	}
@@ -133,7 +133,7 @@ func TestLaunchScan(t *testing.T) {
 			desc: "launching a scan returns successfully",
 			setup: func() {
 			},
-			shouldError: false,
+			shouldError:  false,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{"scan_uuid":"ABC"}`),
@@ -143,7 +143,7 @@ func TestLaunchScan(t *testing.T) {
 			desc: "launching a scan returns invalid json",
 			setup: func() {
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{Not valid JSON}`),
@@ -153,7 +153,7 @@ func TestLaunchScan(t *testing.T) {
 			desc: "launching a scan returns empty body",
 			setup: func() {
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(``),
@@ -164,7 +164,7 @@ func TestLaunchScan(t *testing.T) {
 			setup: func() {
 				tenable.scanUuid = ""
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(``),
@@ -175,8 +175,8 @@ func TestLaunchScan(t *testing.T) {
 			setup: func() {
 				tenable.scanUuid = scanUuid
 			},
-			shouldError: true,
-			returnError: true,
+			shouldError:  true,
+			returnError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{"scan_uuid":"ABC"}`),
@@ -186,10 +186,10 @@ func TestLaunchScan(t *testing.T) {
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
-			"shouldError": testCase.shouldError,
+			"desc":         testCase.desc,
+			"shouldError":  testCase.shouldError,
 			"expectedPath": testCase.expectedPath,
-			"returnError": testCase.returnError,
+			"returnError":  testCase.returnError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
@@ -210,17 +210,17 @@ func TestWaitForScanToComplete(t *testing.T) {
 
 	accessKey := "access"
 	secretKey := "secret"
-	scanID	  := "123"
-	scanUuid  := "scanUuid"
+	scanID := "123"
+	scanUuid := "scanUuid"
 
 	tenable := Tenable{
-		accessKey:  accessKey,
-		secretKey:  secretKey,
-		Targets:    nil,
-		scanID:     scanID,
+		accessKey: accessKey,
+		secretKey: secretKey,
+		Targets:   nil,
+		scanID:    scanID,
 		status: &scanStatus{
-			Pending:   false,
-			Running:   false,
+			Pending: false,
+			Running: false,
 		},
 		scanUuid: scanUuid,
 	}
@@ -232,7 +232,7 @@ func TestWaitForScanToComplete(t *testing.T) {
 			desc: "scan finishes successfully",
 			setup: func() {
 			},
-			shouldError: false,
+			shouldError:  false,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{"status":"pending"}`),
@@ -244,7 +244,7 @@ func TestWaitForScanToComplete(t *testing.T) {
 			desc: "scan status returns invalid json",
 			setup: func() {
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{Not valid JSON}`),
@@ -254,7 +254,7 @@ func TestWaitForScanToComplete(t *testing.T) {
 			desc: "scan status returns empty body",
 			setup: func() {
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(``),
@@ -265,7 +265,7 @@ func TestWaitForScanToComplete(t *testing.T) {
 			setup: func() {
 				tenable.scanUuid = ""
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(``),
@@ -276,8 +276,8 @@ func TestWaitForScanToComplete(t *testing.T) {
 			setup: func() {
 				tenable.scanUuid = scanUuid
 			},
-			shouldError: true,
-			returnError: true,
+			shouldError:  true,
+			returnError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{"status":"completed"}`),
@@ -287,10 +287,10 @@ func TestWaitForScanToComplete(t *testing.T) {
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
-			"shouldError": testCase.shouldError,
+			"desc":         testCase.desc,
+			"shouldError":  testCase.shouldError,
 			"expectedPath": testCase.expectedPath,
-			"returnError": testCase.returnError,
+			"returnError":  testCase.returnError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
@@ -312,17 +312,17 @@ func TestStartExport(t *testing.T) {
 
 	accessKey := "access"
 	secretKey := "secret"
-	scanID	  := "123"
-	scanUuid  := "scanUuid"
+	scanID := "123"
+	scanUuid := "scanUuid"
 
 	tenable := Tenable{
-		accessKey:  accessKey,
-		secretKey:  secretKey,
-		Targets:    nil,
-		scanID:     scanID,
+		accessKey: accessKey,
+		secretKey: secretKey,
+		Targets:   nil,
+		scanID:    scanID,
 		status: &scanStatus{
-			Pending:   false,
-			Running:   false,
+			Pending: false,
+			Running: false,
 		},
 		scanUuid: scanUuid,
 		export: &ExportSettings{
@@ -334,8 +334,8 @@ func TestStartExport(t *testing.T) {
 				},
 			},
 			searchType: "and",
-			format: "pdf",
-			chapters: "vuln_hosts_summary",
+			format:     "pdf",
+			chapters:   "vuln_hosts_summary",
 		},
 		generateReport: true,
 	}
@@ -347,7 +347,7 @@ func TestStartExport(t *testing.T) {
 			desc: "create export returns successfully",
 			setup: func() {
 			},
-			shouldError: false,
+			shouldError:  false,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{"file": 123}`),
@@ -357,7 +357,7 @@ func TestStartExport(t *testing.T) {
 			desc: "create export returns invalid json",
 			setup: func() {
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{Not valid JSON}`),
@@ -367,7 +367,7 @@ func TestStartExport(t *testing.T) {
 			desc: "create export returns empty body",
 			setup: func() {
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(``),
@@ -378,7 +378,7 @@ func TestStartExport(t *testing.T) {
 			setup: func() {
 				tenable.scanID = ""
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(``),
@@ -389,8 +389,8 @@ func TestStartExport(t *testing.T) {
 			setup: func() {
 				tenable.scanID = scanID
 			},
-			shouldError: true,
-			returnError: true,
+			shouldError:  true,
+			returnError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{"file": 123}`),
@@ -400,10 +400,10 @@ func TestStartExport(t *testing.T) {
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
-			"shouldError": testCase.shouldError,
+			"desc":         testCase.desc,
+			"shouldError":  testCase.shouldError,
 			"expectedPath": testCase.expectedPath,
-			"returnError": testCase.returnError,
+			"returnError":  testCase.returnError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
@@ -425,16 +425,16 @@ func TestWaitForExport(t *testing.T) {
 
 	accessKey := "access"
 	secretKey := "secret"
-	scanID	  := "123"
-	scanUuid  := "scanUuid"
-	fileId    := "111"
+	scanID := "123"
+	scanUuid := "scanUuid"
+	fileId := "111"
 
 	tenable := Tenable{
-		accessKey:  accessKey,
-		secretKey:  secretKey,
-		scanID:     scanID,
-		scanUuid: scanUuid,
-		fileId: fileId,
+		accessKey: accessKey,
+		secretKey: secretKey,
+		scanID:    scanID,
+		scanUuid:  scanUuid,
+		fileId:    fileId,
 	}
 
 	statusPath := "/scans/" + scanID + "/export/" + fileId + "/status"
@@ -444,7 +444,7 @@ func TestWaitForExport(t *testing.T) {
 			desc: "create export returns successfully",
 			setup: func() {
 			},
-			shouldError: false,
+			shouldError:  false,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{"status": "pending"}`),
@@ -456,7 +456,7 @@ func TestWaitForExport(t *testing.T) {
 			desc: "create export returns invalid json",
 			setup: func() {
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{Not valid JSON}`),
@@ -466,7 +466,7 @@ func TestWaitForExport(t *testing.T) {
 			desc: "create export returns empty body",
 			setup: func() {
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(``),
@@ -478,7 +478,7 @@ func TestWaitForExport(t *testing.T) {
 				tenable.scanID = ""
 				tenable.fileId = ""
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{"status": "ready"}`),
@@ -490,8 +490,8 @@ func TestWaitForExport(t *testing.T) {
 				tenable.scanID = scanID
 				tenable.fileId = fileId
 			},
-			shouldError: true,
-			returnError: true,
+			shouldError:  true,
+			returnError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`{"status": "ready"}`),
@@ -501,10 +501,10 @@ func TestWaitForExport(t *testing.T) {
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
-			"shouldError": testCase.shouldError,
+			"desc":         testCase.desc,
+			"shouldError":  testCase.shouldError,
 			"expectedPath": testCase.expectedPath,
-			"returnError": testCase.returnError,
+			"returnError":  testCase.returnError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
@@ -526,16 +526,16 @@ func TestDownloadExport(t *testing.T) {
 
 	accessKey := "access"
 	secretKey := "secret"
-	scanID	  := "123"
-	scanUuid  := "scanUuid"
-	fileId    := "111"
+	scanID := "123"
+	scanUuid := "scanUuid"
+	fileId := "111"
 
 	tenable := Tenable{
-		accessKey:  accessKey,
-		secretKey:  secretKey,
-		scanID:     scanID,
-		scanUuid: scanUuid,
-		fileId: fileId,
+		accessKey:      accessKey,
+		secretKey:      secretKey,
+		scanID:         scanID,
+		scanUuid:       scanUuid,
+		fileId:         fileId,
 		generateReport: true,
 		export: &ExportSettings{
 			filePath: "./blah",
@@ -550,7 +550,7 @@ func TestDownloadExport(t *testing.T) {
 			desc: "create export returns successfully",
 			setup: func() {
 			},
-			shouldError: false,
+			shouldError:  false,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`Binary Blob`),
@@ -560,7 +560,7 @@ func TestDownloadExport(t *testing.T) {
 			desc: "create export returns empty body",
 			setup: func() {
 			},
-			shouldError: false,
+			shouldError:  false,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(``),
@@ -571,7 +571,7 @@ func TestDownloadExport(t *testing.T) {
 			setup: func() {
 				tenable.scanID = ""
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`Binary Blob`),
@@ -583,7 +583,7 @@ func TestDownloadExport(t *testing.T) {
 				tenable.scanID = scanID
 				tenable.fileId = ""
 			},
-			shouldError: true,
+			shouldError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`Binary Blob`),
@@ -595,8 +595,8 @@ func TestDownloadExport(t *testing.T) {
 				tenable.scanID = scanID
 				tenable.fileId = fileId
 			},
-			shouldError: true,
-			returnError: true,
+			shouldError:  true,
+			returnError:  true,
 			expectedPath: statusPath,
 			requestBodies: [][]byte{
 				[]byte(`Binary Blob`),
@@ -606,10 +606,10 @@ func TestDownloadExport(t *testing.T) {
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
-			"shouldError": testCase.shouldError,
+			"desc":         testCase.desc,
+			"shouldError":  testCase.shouldError,
 			"expectedPath": testCase.expectedPath,
-			"returnError": testCase.returnError,
+			"returnError":  testCase.returnError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()

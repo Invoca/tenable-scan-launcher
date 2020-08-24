@@ -5,19 +5,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"io"
 	"io/ioutil"
 	"net/http"
-	log "github.com/sirupsen/logrus"
 	"strconv"
 	"time"
 )
 
 type Filter struct {
-	filter string
+	filter  string
 	quality string
-	value string
+	value   string
 }
 
 func CreateFilter(filter string, quality string, value string) (*Filter, error) {
@@ -84,26 +84,26 @@ func setupSeverityFilter(low bool, medium bool, high bool, critical bool) ([]*Fi
 }
 
 type ExportSettings struct {
-	filter []*Filter
-	chapters string
+	filter     []*Filter
+	chapters   string
 	searchType string
-	format string
-	filePath string
+	format     string
+	filePath   string
 }
 
 // TODO: Find a Better Name
 type Tenable struct {
-	accessKey 		string
-	secretKey 		string
-	Targets			[]string
-	scanID 			string
-	fileId			string
-	scanUuid 		string
-	tenableURL 		string
-	status			*scanStatus
-	export 			*ExportSettings
-	generateReport 	bool
-	osFs 			afero.Fs
+	accessKey      string
+	secretKey      string
+	Targets        []string
+	scanID         string
+	fileId         string
+	scanUuid       string
+	tenableURL     string
+	status         *scanStatus
+	export         *ExportSettings
+	generateReport bool
+	osFs           afero.Fs
 }
 
 func (t *Tenable) SetTargets(targets []string) error {
@@ -140,11 +140,11 @@ func SetupTenable(tenableConfig *config.TenableConfig) (*Tenable, error) {
 			chapters = "vuln_hosts_summary; vuln_by_host; compliance_exec; remediations; vuln_by_plugin; compliance"
 		}
 		es = &ExportSettings{
-			filter:     	filters,
+			filter:     filters,
 			chapters:   chapters,
 			searchType: tenableConfig.SearchType,
 			format:     tenableConfig.Format,
-			filePath:   	tenableConfig.FilePath,
+			filePath:   tenableConfig.FilePath,
 		}
 	}
 	t := &Tenable{
@@ -155,24 +155,24 @@ func SetupTenable(tenableConfig *config.TenableConfig) (*Tenable, error) {
 		fileId:     "",
 		scanUuid:   "",
 		tenableURL: "https://cloud.tenable.com",
-		status:     &scanStatus{
-			Pending:   false,
-			Running:   false,
+		status: &scanStatus{
+			Pending: false,
+			Running: false,
 		},
-		export:     es,
+		export:         es,
 		generateReport: tenableConfig.GenerateReport,
-		osFs: afero.NewOsFs(),
+		osFs:           afero.NewOsFs(),
 	}
 	return t, nil
 }
 
 type launchScanBody struct {
-	altTargets	[]string `json:"alt_targets"`
+	altTargets []string `json:"alt_targets"`
 }
 
 type scanStatus struct {
-	Pending		bool
-	Running 	bool
+	Pending bool
+	Running bool
 }
 
 func (t *Tenable) createScanRequestBody(targets []string) ([]byte, error) {
@@ -217,10 +217,10 @@ func (t *Tenable) tenableRequest(url string, method string, headers map[string]s
 	req.Header.Add("X-ApiKeys", apikeyString)
 
 	log.WithFields(log.Fields{
-		"url": url,
-		"body": requestBody,
+		"url":     url,
+		"body":    requestBody,
 		"headers": headers,
-		"method": method,
+		"method":  method,
 	}).Debug("HTTP Request created")
 
 	res, err := http.DefaultClient.Do(req)
@@ -260,7 +260,6 @@ func (t *Tenable) tenableRequest(url string, method string, headers map[string]s
 	return body, nil
 }
 
-
 func (t *Tenable) LaunchScan() error {
 	log.Debug("Launching scan")
 
@@ -297,12 +296,11 @@ func (t *Tenable) LaunchScan() error {
 
 	uuid := data["scan_uuid"].(string)
 
-
 	t.scanUuid = uuid
 	return nil
 }
 
-func (t *Tenable)  WaitForScanToComplete() error {
+func (t *Tenable) WaitForScanToComplete() error {
 	fmt.Println("Waiting for scan to complete")
 
 	if t.scanID == "" {
@@ -335,7 +333,7 @@ func (t *Tenable)  WaitForScanToComplete() error {
 # {"status":"pending"}
 # {"status":"running"}
 # {"status":"completed"}
- */
+*/
 
 func (t *Tenable) checkScanProgess() (string, error) {
 	fmt.Println("Checking progress of the scan")
@@ -382,12 +380,12 @@ func (t *Tenable) StartExport() error {
 	bodyMap := make(map[string]interface{})
 
 	for index, filter := range t.export.filter {
-		bodyMap["filter." + strconv.Itoa(index) + ".filter"] = filter.filter
-		bodyMap["filter." + strconv.Itoa(index) + ".quality"] = filter.quality
-		bodyMap["filter." + strconv.Itoa(index) + ".value"] = filter.value
+		bodyMap["filter."+strconv.Itoa(index)+".filter"] = filter.filter
+		bodyMap["filter."+strconv.Itoa(index)+".quality"] = filter.quality
+		bodyMap["filter."+strconv.Itoa(index)+".value"] = filter.value
 	}
 
-	bodyMap["filter.search_type"] 	= t.export.searchType
+	bodyMap["filter.search_type"] = t.export.searchType
 	bodyMap["format"] = t.export.format
 	bodyMap["chapters"] = t.export.chapters
 
@@ -399,7 +397,6 @@ func (t *Tenable) StartExport() error {
 
 	bodyBuffer := bytes.NewBuffer(reqBody)
 
-
 	headers["accept"] = "application/json"
 	headers["content-type"] = "application/json"
 
@@ -409,14 +406,13 @@ func (t *Tenable) StartExport() error {
 		return fmt.Errorf("StartExport: Error making request %s", err)
 	}
 
-
 	var data map[string]interface{}
 
 	if err := json.Unmarshal(body, &data); err != nil {
 		return fmt.Errorf("StartExport: Error unmarshalling json body: %s", string(body))
 	}
 
-	t.fileId =  strconv.FormatFloat(data["file"].(float64), 'f', -1, 64)
+	t.fileId = strconv.FormatFloat(data["file"].(float64), 'f', -1, 64)
 	return nil
 }
 
@@ -459,10 +455,8 @@ func (t *Tenable) checkExport() (string, error) {
 	headers := make(map[string]string)
 	url := t.tenableURL + "/scans/" + t.scanID + "/export/" + t.fileId + "/status"
 
-
 	headers["accept"] = "application/json"
 	headers["content-type"] = "application/json"
-
 
 	body, err := t.tenableRequest(url, "GET", headers, nil)
 
@@ -502,12 +496,10 @@ func (t *Tenable) DownloadExport() error {
 
 	headers["accept"] = "application/octet-stream"
 
-
 	body, err := t.tenableRequest(url, "GET", headers, nil)
 	if err != nil {
 		return fmt.Errorf("DownloadExport: Error making request %s", err)
 	}
-
 
 	f, err := t.osFs.Create(t.export.filePath)
 	if err != nil {
@@ -526,4 +518,3 @@ func (t *Tenable) DownloadExport() error {
 	return nil
 
 }
-

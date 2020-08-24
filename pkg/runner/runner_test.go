@@ -19,7 +19,6 @@ type testCase struct {
 func TestRun(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 
-
 	gcloudInstances := []string{"1.1.1.1"}
 	awsInstances := []string{"2.2.2.2"}
 
@@ -41,7 +40,7 @@ func TestRun(t *testing.T) {
 		includeAWS:     true,
 		generateReport: true,
 	}
-	
+
 	testCases := []testCase{
 		{
 			desc: "AWS and GCloud are able to Gather IPs without issue",
@@ -53,7 +52,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
@@ -105,7 +104,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(fmt.Errorf("Tenable Error"))
@@ -122,7 +121,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
@@ -140,7 +139,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
@@ -159,7 +158,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
@@ -179,7 +178,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
@@ -200,7 +199,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
 
-				ec2Mock.On("GatherIPs", mock.Anything).Return( awsInstances, nil)
+				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
@@ -212,12 +211,11 @@ func TestRun(t *testing.T) {
 			},
 			shouldError: true,
 		},
-
 	}
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
+			"desc":        testCase.desc,
 			"shouldError": testCase.shouldError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
@@ -230,7 +228,7 @@ func TestRun(t *testing.T) {
 
 		log.WithFields(log.Fields{
 			"shouldError": testCase.shouldError,
-			"Error": err,
+			"Error":       err,
 		}).Debug("Run() complete")
 
 		if testCase.shouldError {

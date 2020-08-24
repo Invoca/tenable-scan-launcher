@@ -33,19 +33,18 @@ func TestGetAWSInstances(t *testing.T) {
 				ReservationId: aws.String("123ABC"),
 				Instances: []*ec2.Instance{
 					{
-						PrivateIpAddress: 	   aws.String("1.1.1.1"),
-						State: &runningState,
+						PrivateIpAddress: aws.String("1.1.1.1"),
+						State:            &runningState,
 					},
 					{
-						PrivateIpAddress: 	   aws.String("2.2.2.2"),
-						State: &runningState,
+						PrivateIpAddress: aws.String("2.2.2.2"),
+						State:            &runningState,
 					},
 					{
-						PrivateIpAddress: 	   aws.String("3.3.3.3"),
-						State: &runningState,
+						PrivateIpAddress: aws.String("3.3.3.3"),
+						State:            &runningState,
 					},
 				},
-
 			},
 		},
 	}
@@ -71,19 +70,17 @@ func TestGetAWSInstances(t *testing.T) {
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
+			"desc":        testCase.desc,
 			"shouldError": testCase.shouldError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
-
 
 		ec2api := AWSEc2{}
 
 		_, err := ec2api.getInstances(mockEc2)
 
 		mockEc2.AssertExpectations(t)
-
 
 		if testCase.shouldError {
 			assert.Error(t, err)
@@ -100,11 +97,9 @@ func TestGetAWSInstances(t *testing.T) {
 
 }
 
-
 func TestParseInstances(t *testing.T) {
 
 	log.SetLevel(log.DebugLevel)
-
 
 	runningCode := int64(16)
 	runningState := ec2.InstanceState{Code: &runningCode}
@@ -118,25 +113,24 @@ func TestParseInstances(t *testing.T) {
 	}
 
 	resp := []*ec2.Reservation{
-			{
-				ReservationId: aws.String("123ABC"),
-				Instances: []*ec2.Instance{
-					{
-						PrivateIpAddress: 	   aws.String("1.1.1.1"),
-						State: &runningState,
-					},
-					{
-						PrivateIpAddress: 	   aws.String("2.2.2.2"),
-						State: &runningState,
-					},
-					{
-						PrivateIpAddress: 	   aws.String("3.3.3.3"),
-						State: &nonRunningState,
-					},
+		{
+			ReservationId: aws.String("123ABC"),
+			Instances: []*ec2.Instance{
+				{
+					PrivateIpAddress: aws.String("1.1.1.1"),
+					State:            &runningState,
 				},
-
+				{
+					PrivateIpAddress: aws.String("2.2.2.2"),
+					State:            &runningState,
+				},
+				{
+					PrivateIpAddress: aws.String("3.3.3.3"),
+					State:            &nonRunningState,
+				},
 			},
-		}
+		},
+	}
 	ec2api := AWSEc2{}
 	log.Debug("TestParseInstances: Instances Are passed to parseInstance")
 	err := ec2api.parseInstances(resp)
@@ -147,6 +141,3 @@ func TestParseInstances(t *testing.T) {
 	err = ec2api.parseInstances(nil)
 	assert.Error(t, err)
 }
-
-
-

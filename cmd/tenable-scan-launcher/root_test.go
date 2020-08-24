@@ -10,7 +10,7 @@ import (
 
 type setupRunnerTestCast struct {
 	desc        string
-	baseConfig   *config.BaseConfig
+	baseConfig  *config.BaseConfig
 	shouldError bool
 }
 
@@ -29,14 +29,14 @@ func TestSetupBaseConfig(t *testing.T) {
 	}
 
 	stringFlags := []string{
-	"tenable-access-key",
-	"tenable-secret-key",
-	"tenable-scan-id",
-	"gcloud-service-account-path",
-	"gcloud-project",
-	"filter-search-type",
-	"report-format",
-	"report-file-location"}
+		"tenable-access-key",
+		"tenable-secret-key",
+		"tenable-scan-id",
+		"gcloud-service-account-path",
+		"gcloud-project",
+		"filter-search-type",
+		"report-format",
+		"report-file-location"}
 	newCmd := NewRootCmd()
 
 	for _, f := range stringFlags {
@@ -65,7 +65,7 @@ type loggingPair struct {
 	expectedLoglevel log.Level
 }
 
-//TODO: Add method of testing logging type. Not currently possible as far as I know. 
+//TODO: Add method of testing logging type. Not currently possible as far as I know.
 func TestSetupLogging(t *testing.T) {
 
 	lp := []loggingPair{
@@ -108,10 +108,10 @@ func TestSetupLogging(t *testing.T) {
 
 func TestSetupRunner(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
-	testCases := []*setupRunnerTestCast {
+	testCases := []*setupRunnerTestCast{
 		{
-			desc: "It should fail when the config struct is empty.",
-			baseConfig: &config.BaseConfig{},
+			desc:        "It should fail when the config struct is empty.",
+			baseConfig:  &config.BaseConfig{},
 			shouldError: true,
 		},
 		{
@@ -131,7 +131,7 @@ func TestSetupRunner(t *testing.T) {
 		{
 			desc: "It should fail when no Tenable credentials are set",
 			baseConfig: &config.BaseConfig{
-				GCloudConfig: &config.GCloudConfig{},
+				GCloudConfig:  &config.GCloudConfig{},
 				TenableConfig: &config.TenableConfig{},
 			},
 			shouldError: true,
@@ -141,8 +141,8 @@ func TestSetupRunner(t *testing.T) {
 			baseConfig: &config.BaseConfig{
 				GCloudConfig: &config.GCloudConfig{},
 				TenableConfig: &config.TenableConfig{
-					AccessKey: "ak",
-					SecretKey: "sk",
+					AccessKey:      "ak",
+					SecretKey:      "sk",
 					GenerateReport: true,
 				},
 			},
@@ -153,10 +153,10 @@ func TestSetupRunner(t *testing.T) {
 			baseConfig: &config.BaseConfig{
 				GCloudConfig: &config.GCloudConfig{},
 				TenableConfig: &config.TenableConfig{
-					AccessKey: "ak",
-					SecretKey: "sk",
+					AccessKey:      "ak",
+					SecretKey:      "sk",
 					GenerateReport: true,
-					LowSeverity: true,
+					LowSeverity:    true,
 				},
 			},
 			shouldError: false,
@@ -176,7 +176,7 @@ func TestSetupRunner(t *testing.T) {
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
+			"desc":        testCase.desc,
 			"shouldError": testCase.shouldError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
@@ -184,7 +184,7 @@ func TestSetupRunner(t *testing.T) {
 
 		log.WithFields(log.Fields{
 			"shouldError": testCase.shouldError,
-			"err": err,
+			"err":         err,
 		}).Debug("Finished running testCase " + strconv.Itoa(index))
 
 		if testCase.shouldError {

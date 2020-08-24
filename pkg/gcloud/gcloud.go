@@ -11,12 +11,11 @@ import (
 	"sync"
 )
 
-
 type GCloud struct {
-	IPs		[]string
+	IPs            []string
 	computeService wrapper.GCloudWrapper
-	regions *[]string
-	mux sync.Mutex
+	regions        *[]string
+	mux            sync.Mutex
 }
 
 func (g *GCloud) Setup(config *config.BaseConfig) error {
@@ -50,17 +49,16 @@ func (g *GCloud) SetupGCloud(computeService wrapper.GCloudWrapper) error {
 	if &computeService == nil {
 		return fmt.Errorf("SetupGCloud: computeService cannot be nil")
 	}
-	
+
 	g.computeService = computeService
 	return nil
 }
-
 
 func (g *GCloud) getAllRegionsForProject() error {
 	regions, err := g.computeService.Zones()
 
 	if err != nil {
-		return fmt.Errorf("getAllRegionsForProject: Error Getting Zones")
+		return fmt.Errorf("getAllRegionsForProject: Error Getting Zones %s", err)
 	}
 
 	g.regions = &regions
@@ -100,7 +98,10 @@ func (g *GCloud) GatherIPs() ([]string, error) {
 		return nil, fmt.Errorf("getAllRegionsForProject: computeService cannot be nil")
 	}
 
-	g.getAllRegionsForProject()
+	err := g.getAllRegionsForProject()
+	if err != nil {
+		return nil, fmt.Errorf("GatherIPs: Error getting regions. %s", err)
+	}
 
 	if &g.regions == nil {
 		return nil, fmt.Errorf("getAllRegionsForProject: regions cannot be nil")
@@ -113,11 +114,10 @@ func (g *GCloud) GatherIPs() ([]string, error) {
 	return g.IPs, nil
 }
 
-type GCloudWrapper struct{
-	computeService 	*compute.Service
-	project			string
+type GCloudWrapper struct {
+	computeService *compute.Service
+	project        string
 }
-
 
 func newCloudWrapper(computeService *compute.Service, project string) (*GCloudWrapper, error) {
 	if computeService == nil {
@@ -145,7 +145,7 @@ func (g *GCloudWrapper) Zones() ([]string, error) {
 	}
 
 	for _, region := range regions.Items {
-		regionNames = append(regionNames,region.Name)
+		regionNames = append(regionNames, region.Name)
 	}
 
 	return regionNames, nil

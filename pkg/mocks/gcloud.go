@@ -1,7 +1,8 @@
 package mocks
+
 import (
-	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
 	"fmt"
+	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
 )
 
 type GCloudServiceMock interface {
@@ -31,4 +32,3 @@ func (g *GgCloudServiceMock) InstancesIPsInRegion(region string) ([]string, erro
 		return args.Get(0).([]string), args.Error(1)
 	}
 }
-
