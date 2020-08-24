@@ -73,7 +73,7 @@ func (g *GCloud) addIPsToStruct(ips []string) {
 
 func (g *GCloud) getInstancesInRegion(region string) error {
 	if &region == nil {
-		fmt.Errorf("getInstancesInRegion: region cannot be nil")
+		return fmt.Errorf("getInstancesInRegion: region cannot be nil")
 	}
 
 	log.Debug(region)

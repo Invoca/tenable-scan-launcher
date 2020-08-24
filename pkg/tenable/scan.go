@@ -167,7 +167,7 @@ func SetupTenable(tenableConfig *config.TenableConfig) (*Tenable, error) {
 }
 
 type launchScanBody struct {
-	altTargets []string `json:"alt_targets"`
+	AltTargets []string `json:"alt_targets"`
 }
 
 type scanStatus struct {
@@ -176,7 +176,7 @@ type scanStatus struct {
 }
 
 func (t *Tenable) createScanRequestBody(targets []string) ([]byte, error) {
-	launchScanBody := &launchScanBody{altTargets: targets}
+	launchScanBody := &launchScanBody{AltTargets: targets}
 	res, err := json.Marshal(launchScanBody)
 	if err != nil {
 		return nil, fmt.Errorf("createRequest: Error in json.Marshal(): %s", err)
