@@ -9,11 +9,11 @@ type GCloudServiceMock interface {
 	wrapper.GCloudWrapper
 }
 
-type GgCloudServiceMock struct {
+type GCloudMock struct {
 	ResettableMock
 }
 
-func (g *GgCloudServiceMock) Zones() ([]string, error) {
+func (g *GCloudMock) Zones() ([]string, error) {
 	fmt.Println("Zones() Mock")
 	args := g.Called(nil)
 	if args.Get(0) == nil {
@@ -23,7 +23,7 @@ func (g *GgCloudServiceMock) Zones() ([]string, error) {
 	}
 }
 
-func (g *GgCloudServiceMock) InstancesIPsInRegion(region string) ([]string, error) {
+func (g *GCloudMock) InstancesIPsInRegion(region string) ([]string, error) {
 	fmt.Println("InstancesIPsInRegion() Mock")
 	args := g.Called(region)
 	if args.Get(0) == nil {
