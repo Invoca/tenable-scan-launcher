@@ -10,13 +10,11 @@ import (
 	"testing"
 )
 
-
 type getRegionsTestCast struct {
 	desc        string
 	setup       func()
 	shouldError bool
 }
-
 
 func TestGetRegionsForProject(t *testing.T) {
 
@@ -52,14 +50,13 @@ func TestGetRegionsForProject(t *testing.T) {
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
+			"desc":        testCase.desc,
 			"shouldError": testCase.shouldError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
 
 		err := gcloud.getAllRegionsForProject()
-
 
 		if testCase.shouldError {
 			assert.Error(t, err)
@@ -104,14 +101,13 @@ func TestGetInstancesInRegion(t *testing.T) {
 
 	for index, testCase := range testCases {
 		log.WithFields(log.Fields{
-			"desc": testCase.desc,
+			"desc":        testCase.desc,
 			"shouldError": testCase.shouldError,
 		}).Debug("Starting testCase " + strconv.Itoa(index))
 
 		testCase.setup()
 
 		err := gcloud.getInstancesInRegion("test")
-
 
 		if testCase.shouldError {
 			assert.Error(t, err)

@@ -43,4 +43,3 @@ func (m *MockTenableAPI) WaitForScanToComplete() error {
 	args := m.Called()
 	return args.Error(0)
 }
-

@@ -11,11 +11,11 @@ import (
 )
 
 type Runner struct {
-	ec2Svc wrapper.CloudWrapper
-	gcloud wrapper.CloudWrapper
-	tenable wrapper.Tenable
-	includeGCloud bool
-	includeAWS bool
+	ec2Svc         wrapper.CloudWrapper
+	gcloud         wrapper.CloudWrapper
+	tenable        wrapper.Tenable
+	includeGCloud  bool
+	includeAWS     bool
 	generateReport bool
 }
 
@@ -109,7 +109,7 @@ func (r *Runner) Run() error {
 
 func (r *Runner) getIPs() error {
 	log.Debug("getIPs")
-	var  ips []string
+	var ips []string
 
 	if r.includeGCloud {
 		log.Debug("Gathering Google Cloud IPs")
@@ -145,7 +145,6 @@ func (r *Runner) getIPs() error {
 	targets = append(targets, target1)
 
 	r.tenable.SetTargets(targets)
-
 
 	err := r.tenable.SetTargets(ips)
 

@@ -53,7 +53,7 @@ import (
 
 type logConfig struct {
 	LogLevel string
-	LogType string
+	LogType  string
 }
 
 func NewRootCmd() *cobra.Command {
@@ -92,20 +92,18 @@ instances given based on the scanner id. It is also able to export the scans and
 	}
 
 	f := cmd.Flags()
-	f.StringVarP(&logConfig.LogLevel,"log-level", "", "", "Log level (trace,info,fatal,panic,warn, debug) default is debug")
+	f.StringVarP(&logConfig.LogLevel, "log-level", "", "", "Log level (trace,info,fatal,panic,warn, debug) default is debug")
 	f.StringVarP(&logConfig.LogType, "log-type", "", "", "Log type (text,json)")
 
 	f.StringVarP(&baseConfig.TenableConfig.AccessKey, "tenable-access-key", "a", "", "tenable access key")
 	f.StringVarP(&baseConfig.TenableConfig.SecretKey, "tenable-secret-key", "s", "", "tenable secret key")
 	f.StringVarP(&baseConfig.TenableConfig.ScanID, "tenable-scan-id", "i", "", "tenable scanID")
 
-
-	f.BoolVarP(&baseConfig.IncludeGCloud, "include-gcloud", "g",false, "Include Google Cloud Instances In Report")
-	f.StringVarP(&baseConfig.GCloudConfig.ServiceAccountPath ,"gcloud-service-account-path", "", "", "Path of service account token. Uses default if not specified")
+	f.BoolVarP(&baseConfig.IncludeGCloud, "include-gcloud", "g", false, "Include Google Cloud Instances In Report")
+	f.StringVarP(&baseConfig.GCloudConfig.ServiceAccountPath, "gcloud-service-account-path", "", "", "Path of service account token. Uses default if not specified")
 	f.StringVarP(&baseConfig.GCloudConfig.ProjectName, "gcloud-project", "p", "", "GCloud project to list instances from")
 
 	f.BoolVarP(&baseConfig.IncludeAWS, "include-aws", "A", false, "Include AWS Instances In Report")
-
 
 	f.BoolVarP(&baseConfig.TenableConfig.GenerateReport, "generate-report", "R", false, "Generate A report after the scan is complete")
 	f.BoolVarP(&baseConfig.TenableConfig.LowSeverity, "low-severity", "L", false, "Add Low Severity To Report")
@@ -144,7 +142,7 @@ func setupLogging(logConfig *logConfig) error {
 		log.SetLevel(log.FatalLevel)
 	} else if logConfig.LogLevel == "trace" {
 		log.SetLevel(log.TraceLevel)
-	} else  {
+	} else {
 		log.SetLevel(log.WarnLevel)
 	}
 	return nil

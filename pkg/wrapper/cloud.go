@@ -6,4 +6,3 @@ type CloudWrapper interface {
 	Setup(config *config.BaseConfig) error
 	GatherIPs() ([]string, error)
 }
-

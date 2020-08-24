@@ -18,4 +18,3 @@ func (m *MockRunner) DescribeInstances(input *ec2.DescribeInstancesInput) (*ec2.
 		return args.Get(0).(*ec2.DescribeInstancesOutput), args.Error(1)
 	}
 }
-

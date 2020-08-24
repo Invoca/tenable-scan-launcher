@@ -10,13 +10,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-
 type AWSEc2 struct {
-	IPs		[]string
+	IPs    []string
 	Ec2svc ec2iface.EC2API
 }
 
-func (m *AWSEc2)  Setup(config *config.BaseConfig) error {
+func (m *AWSEc2) Setup(config *config.BaseConfig) error {
 	if config.IncludeAWS == false {
 		return fmt.Errorf("Setup: AWS is not supposed to be included")
 	}
