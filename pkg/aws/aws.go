@@ -35,7 +35,7 @@ func (m *AWSEc2) GatherIPs() ([]string, error) {
 	log.Debug("Getting AWS IPs")
 
 	if m.Ec2svc == nil {
-		fmt.Errorf("GetAWSIPs: Ec2svc object is nil")
+		return nil, fmt.Errorf("GetAWSIPs: Ec2svc object is nil")
 	}
 
 	instances, err := m.getInstances(m.Ec2svc)
