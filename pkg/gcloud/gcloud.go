@@ -110,14 +110,16 @@ func (g *GCloud) GatherIPs() ([]string, error) {
 		return nil, fmt.Errorf("getAllRegionsForProject: regions cannot be nil")
 	}
 
-	concurrentRoutines := make(chan struct{}, g.concurrency)
-
-	for _, region := range g.regions {
+	for index, region := range g.regions {
 		wg.Add(1)
-		innerRegion := region
-		concurrentRoutines <- struct{}{}
-		go g.getInstancesInRegion(innerRegion, &wg)
-		<-concurrentRoutines
+		go g.getInstancesInRegion(region, &wg)
+		if index > 0 && (index % g.concurrency) == 0 {
+			log.WithFields(log.Fields{
+				"index":     index,
+				"concurrency":    g.concurrency,
+			}).Debug("Waiting")
+			wg.Wait()
+		}
 	}
 
 	wg.Wait()
