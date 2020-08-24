@@ -95,7 +95,6 @@ func (g *GCloud) getInstancesInRegion(region string, wg *sync.WaitGroup) error {
 // GetGCloudIPs
 func (g *GCloud) GatherIPs() ([]string, error) {
 	var wg sync.WaitGroup
-	concurrency := 5
 	log.Debug("Getting IPs from Google Cloud")
 
 	if g.computeService == nil {
@@ -116,7 +115,7 @@ func (g *GCloud) GatherIPs() ([]string, error) {
 		go g.getInstancesInRegion(region, &wg)
 
 		// Wait to create more threads until the number concurrent threads returns
-		if index > 0 && (index%concurrency) == 0 {
+		if index > 0 && (index%g.concurrency) == 0 {
 			wg.Wait()
 		}
 	}
