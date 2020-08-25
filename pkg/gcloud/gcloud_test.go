@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"strconv"
-	"sync"
 	"testing"
 )
 
@@ -69,7 +68,6 @@ func TestGetRegionsForProject(t *testing.T) {
 }
 
 func TestGetInstancesInRegion(t *testing.T) {
-	var wg sync.WaitGroup
 
 	serviceMock := mocks.GCloudMock{}
 	gcloud := GCloud{}
@@ -109,8 +107,7 @@ func TestGetInstancesInRegion(t *testing.T) {
 
 		testCase.setup()
 
-		wg.Add(1)
-		err := gcloud.getInstancesInRegion("test", &wg)
+		err := gcloud.getInstancesInRegion("test")
 
 		if testCase.shouldError {
 			assert.Error(t, err)
