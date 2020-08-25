@@ -2,18 +2,18 @@ FROM golang:1.14.5 as build
 ENV CGO_ENABLED=0
 ENV GOPATH=/go
 
-WORKDIR /go/src/invoca/tenable-scan-launcher
+WORKDIR /go/src/invoca/scan-launcher
 
 COPY . .
 
 RUN go mod download
 
-RUN go build -mod=readonly -o /tenable-scan-launcher $PWD/cmd/tenable-scan-launcher
+RUN go build -mod=readonly
 
 FROM gcr.io/distroless/static:latest
 
-COPY --from=build /go/src/invoca/tenable-scan-launcher/tenable-scan-launcher /
+COPY --from=build /go/src/invoca/scan-launcher/scan-launcher /
 
 USER 65534
 
-ENTRYPOINT ["/tenable-scan-launcher"]
+ENTRYPOINT ["/scan-launcher"]
