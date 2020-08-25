@@ -39,10 +39,6 @@ func TestSetupBaseConfig(t *testing.T) {
 		"report-file-location",
 	}
 
-	intFlags := []string{
-		"concurrency",
-	}
-
 	newCmd := NewRootCmd()
 
 	for _, f := range stringFlags {
@@ -56,13 +52,6 @@ func TestSetupBaseConfig(t *testing.T) {
 		assert.NotNilf(t, newCmd.Flags().Lookup(f), "generate command should have flag %s, but was nil", f)
 
 		_, err := newCmd.Flags().GetBool(f)
-		assert.NoError(t, err)
-	}
-
-	for _, f := range intFlags {
-		assert.NotNilf(t, newCmd.Flags().Lookup(f), "generate command should have flag %s, but was nil", f)
-
-		_, err := newCmd.Flags().GetInt(f)
 		assert.NoError(t, err)
 	}
 }

@@ -16,7 +16,6 @@ type GCloud struct {
 	computeService wrapper.GCloudWrapper
 	regions        []string
 	mux            sync.Mutex
-	concurrency    int
 }
 
 func (g *GCloud) Setup(config *config.BaseConfig) error {
@@ -26,7 +25,6 @@ func (g *GCloud) Setup(config *config.BaseConfig) error {
 	}
 
 	g.computeService = GCloudwrapper
-	g.concurrency = config.GCloudConfig.Concurrency
 	return nil
 }
 
@@ -71,30 +69,17 @@ func (g *GCloud) storeIPs(ips []string) {
 	g.mux.Unlock()
 }
 
-func (g *GCloud) getInstancesInRegion(region string, wg *sync.WaitGroup) error {
-	defer wg.Done()
-
-	if region == "" {
-		return fmt.Errorf("getInstancesInRegion: region cannot be empty")
-	}
-
-	log.Debug(region)
-
+func (g *GCloud) getInstancesInRegion(region string) error {
 	privateIps, err := g.computeService.InstancesIPsInRegion(region)
-
 	if err != nil {
-		return fmt.Errorf("getInstancesInRegion: Error Instances in zone")
+		return fmt.Errorf("getInstancesInRegion: Error Instances in zone %s", err)
 	}
-
-	log.Debug("getInstancesInRegion: ", privateIps)
-
 	g.storeIPs(privateIps)
 	return nil
 }
 
 // GetGCloudIPs
 func (g *GCloud) GatherIPs() ([]string, error) {
-	var wg sync.WaitGroup
 	log.Debug("Getting IPs from Google Cloud")
 
 	if g.computeService == nil {
@@ -110,20 +95,12 @@ func (g *GCloud) GatherIPs() ([]string, error) {
 		return nil, fmt.Errorf("getAllRegionsForProject: regions cannot be nil")
 	}
 
-	for index, region := range g.regions {
-		wg.Add(1)
-		go g.getInstancesInRegion(region, &wg)
-		if index > 0 && (index % g.concurrency) == 0 {
-			log.WithFields(log.Fields{
-				"index":     index,
-				"concurrency":    g.concurrency,
-			}).Debug("Waiting")
-			wg.Wait()
+	for _, region := range g.regions {
+		err := g.getInstancesInRegion(region)
+		if err != nil {
+			return nil, fmt.Errorf("GatherIPs: Error getting ips in region %s", err)
 		}
 	}
-
-	wg.Wait()
-
 	return g.IPs, nil
 }
 
@@ -180,7 +157,6 @@ func (g *GCloudWrapper) InstancesIPsInRegion(region string) ([]string, error) {
 	}
 
 	for _, resItem := range resList.Items {
-		fmt.Println(resItem.Name)
 		for _, device := range resItem.NetworkInterfaces {
 			privateIps = append(privateIps, device.NetworkIP)
 		}
