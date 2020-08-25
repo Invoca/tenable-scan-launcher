@@ -117,7 +117,7 @@ const (
 	SYS_GETPPID                = 5108
 	SYS_GETPGRP                = 5109
 	SYS_SETSID                 = 5110
-	SYS_SETREUID               = 5***REMOVED***
+	SYS_SETREUID               = 5111
 	SYS_SETREGID               = 5112
 	SYS_GETGROUPS              = 5113
 	SYS_SETGROUPS              = 5114

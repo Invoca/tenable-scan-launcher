@@ -113,7 +113,7 @@ const (
 	SYS_PLEDGE         = 108 // { int sys_pledge(const char *promises, const char *execpromises); }
 	SYS_PPOLL          = 109 // { int sys_ppoll(struct pollfd *fds, u_int nfds, const struct timespec *ts, const sigset_t *mask); }
 	SYS_PSELECT        = 110 // { int sys_pselect(int nd, fd_set *in, fd_set *ou, fd_set *ex, const struct timespec *ts, const sigset_t *mask); }
-	SYS_SIGSUSPEND     = ***REMOVED*** // { int sys_sigsuspend(int mask); }
+	SYS_SIGSUSPEND     = 111 // { int sys_sigsuspend(int mask); }
 	SYS_SENDSYSLOG     = 112 // { int sys_sendsyslog(const char *buf, size_t nbyte, int flags); }
 	SYS_UNVEIL         = 114 // { int sys_unveil(const char *path, const char *permissions); }
 	SYS_GETSOCKOPT     = 118 // { int sys_getsockopt(int s, int level, int name, void *val, socklen_t *avalsize); }

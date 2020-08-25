@@ -83,7 +83,7 @@ const (
 	SYS_BIND                           = 104
 	SYS_SETSOCKOPT                     = 105
 	SYS_LISTEN                         = 106
-	SYS_SIGSUSPEND                     = ***REMOVED***
+	SYS_SIGSUSPEND                     = 111
 	SYS_GETTIMEOFDAY                   = 116
 	SYS_GETRUSAGE                      = 117
 	SYS_GETSOCKOPT                     = 118

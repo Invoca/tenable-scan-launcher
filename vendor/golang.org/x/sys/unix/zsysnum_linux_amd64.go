@@ -117,7 +117,7 @@ const (
 	SYS_GETEGID                = 108
 	SYS_SETPGID                = 109
 	SYS_GETPPID                = 110
-	SYS_GETPGRP                = ***REMOVED***
+	SYS_GETPGRP                = 111
 	SYS_SETSID                 = 112
 	SYS_SETREUID               = 113
 	SYS_SETREGID               = 114

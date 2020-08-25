@@ -2158,7 +2158,7 @@ const (
 	SOL_NFC                              = 0x118
 	SOL_PACKET                           = 0x107
 	SOL_PNPIPE                           = 0x113
-	SOL_PPPOL2TP                         = 0x***REMOVED***
+	SOL_PPPOL2TP                         = 0x111
 	SOL_RAW                              = 0xff
 	SOL_RDS                              = 0x114
 	SOL_RXRPC                            = 0x110
@@ -3007,7 +3007,7 @@ var errorList = [...]struct {
 	{108, "EDEADLOCK", "file locking deadlock error"},
 	{109, "EBFONT", "bad font file format"},
 	{110, "ELIBEXEC", "cannot exec a shared library directly"},
-	{***REMOVED***, "ENODATA", "no data available"},
+	{111, "ENODATA", "no data available"},
 	{112, "ELIBBAD", "accessing a corrupted shared library"},
 	{113, "ENOPKG", "package not installed"},
 	{114, "ELIBACC", "can not access a needed shared library"},

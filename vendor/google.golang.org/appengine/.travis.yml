@@ -17,4 +17,4 @@ matrix:
     - go: 1.10.x
       env: GOAPP=false
     - go: 1.11.x
-      env: GO***REMOVED***MODULE=on
+      env: GO111MODULE=on
