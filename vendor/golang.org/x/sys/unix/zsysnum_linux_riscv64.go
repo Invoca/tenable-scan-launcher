@@ -116,7 +116,7 @@ const (
 	SYS_TIMER_GETTIME          = 108
 	SYS_TIMER_GETOVERRUN       = 109
 	SYS_TIMER_SETTIME          = 110
-	SYS_TIMER_DELETE           = ***REMOVED***
+	SYS_TIMER_DELETE           = 111
 	SYS_CLOCK_SETTIME          = 112
 	SYS_CLOCK_GETTIME          = 113
 	SYS_CLOCK_GETRES           = 114

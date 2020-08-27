@@ -441,7 +441,7 @@ const (
 	WinCapabilityAppointmentsSid                  = 108
 	WinCapabilityContactsSid                      = 109
 	WinAccountDefaultSystemManagedSid             = 110
-	WinBuiltinDefaultSystemManagedGroupSid        = ***REMOVED***
+	WinBuiltinDefaultSystemManagedGroupSid        = 111
 	WinBuiltinStorageReplicaAdminsSid             = 112
 	WinAccountKeyAdminsSid                        = 113
 	WinAccountEnterpriseKeyAdminsSid              = 114

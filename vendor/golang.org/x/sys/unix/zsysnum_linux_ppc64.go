@@ -117,7 +117,7 @@ const (
 	SYS_FSTAT                  = 108
 	SYS_OLDUNAME               = 109
 	SYS_IOPL                   = 110
-	SYS_VHANGUP                = ***REMOVED***
+	SYS_VHANGUP                = 111
 	SYS_IDLE                   = 112
 	SYS_VM86                   = 113
 	SYS_WAIT4                  = 114

@@ -117,7 +117,7 @@ const (
 	SYS_FSTAT                        = 4108
 	SYS_UNUSED109                    = 4109
 	SYS_IOPL                         = 4110
-	SYS_VHANGUP                      = 4***REMOVED***
+	SYS_VHANGUP                      = 4111
 	SYS_IDLE                         = 4112
 	SYS_VM86                         = 4113
 	SYS_WAIT4                        = 4114

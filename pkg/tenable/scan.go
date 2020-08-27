@@ -329,7 +329,7 @@ func (t *Tenable) WaitForScanToComplete() error {
 }
 
 /*
-# https://cloud.tenable.com/scans/***REMOVED***/latest-status
+# https://cloud.tenable.com/scans/111/latest-status
 # {"status":"pending"}
 # {"status":"running"}
 # {"status":"completed"}

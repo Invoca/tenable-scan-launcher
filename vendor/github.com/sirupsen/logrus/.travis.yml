@@ -12,13 +12,13 @@ matrix:
       script:
         - go test -race -v ./...
     - go: 1.11.x
-      env: GO***REMOVED***MODULE=on
+      env: GO111MODULE=on
       install:
         - go mod download
       script:
         - go test -race -v ./...
     - go: 1.11.x
-      env: GO***REMOVED***MODULE=off
+      env: GO111MODULE=off
       install:
         - go get github.com/stretchr/testify/assert
         - go get golang.org/x/crypto/ssh/terminal
@@ -35,13 +35,13 @@ matrix:
       script:
         - go test -race -v -tags appengine ./...
     - go: 1.11.x
-      env: GO***REMOVED***MODULE=on
+      env: GO111MODULE=on
       install:
         - go mod download
       script:
         - go test -race -v -tags appengine ./...
     - go: 1.11.x
-      env: GO***REMOVED***MODULE=off
+      env: GO111MODULE=off
       install:
         - go get github.com/stretchr/testify/assert
         - go get golang.org/x/crypto/ssh/terminal
