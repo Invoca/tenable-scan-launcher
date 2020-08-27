@@ -63,18 +63,12 @@ func (g *GCloud) getAllRegionsForProject() error {
 	return nil
 }
 
-func (g *GCloud) storeIPs(ips []string) {
-	g.mux.Lock()
-	g.IPs = append(g.IPs, ips...)
-	g.mux.Unlock()
-}
-
 func (g *GCloud) getInstancesInRegion(region string) error {
 	privateIps, err := g.computeService.InstancesIPsInRegion(region)
 	if err != nil {
 		return fmt.Errorf("getInstancesInRegion: Error Instances in zone %s", err)
 	}
-	g.storeIPs(privateIps)
+	g.IPs = append(g.IPs, privateIps...)
 	return nil
 }
 

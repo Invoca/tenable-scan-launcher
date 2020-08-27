@@ -2105,7 +2105,7 @@ const (
 	SOL_NFC                              = 0x118
 	SOL_PACKET                           = 0x107
 	SOL_PNPIPE                           = 0x113
-	SOL_PPPOL2TP                         = 0x111
+	SOL_PPPOL2TP                         = 0x***REMOVED***
 	SOL_RAW                              = 0xff
 	SOL_RDS                              = 0x114
 	SOL_RXRPC                            = 0x110

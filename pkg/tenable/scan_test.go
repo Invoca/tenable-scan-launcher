@@ -427,7 +427,7 @@ func TestWaitForExport(t *testing.T) {
 	secretKey := "secret"
 	scanID := "123"
 	scanUuid := "scanUuid"
-	fileId := "111"
+	fileId := "***REMOVED***"
 
 	tenable := Tenable{
 		accessKey: accessKey,
@@ -528,7 +528,7 @@ func TestDownloadExport(t *testing.T) {
 	secretKey := "secret"
 	scanID := "123"
 	scanUuid := "scanUuid"
-	fileId := "111"
+	fileId := "***REMOVED***"
 
 	tenable := Tenable{
 		accessKey:      accessKey,

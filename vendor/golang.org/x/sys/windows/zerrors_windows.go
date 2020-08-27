@@ -230,7 +230,7 @@ const (
 	ERROR_DRIVE_LOCKED                                                        syscall.Errno = 108
 	ERROR_BROKEN_PIPE                                                         syscall.Errno = 109
 	ERROR_OPEN_FAILED                                                         syscall.Errno = 110
-	ERROR_BUFFER_OVERFLOW                                                     syscall.Errno = 111
+	ERROR_BUFFER_OVERFLOW                                                     syscall.Errno = ***REMOVED***
 	ERROR_DISK_FULL                                                           syscall.Errno = 112
 	ERROR_NO_MORE_SEARCH_HANDLES                                              syscall.Errno = 113
 	ERROR_INVALID_TARGET_HANDLE                                               syscall.Errno = 114
@@ -834,16 +834,16 @@ const (
 	ERROR_DEVICE_NOT_PARTITIONED                                              syscall.Errno = 1107
 	ERROR_UNABLE_TO_LOCK_MEDIA                                                syscall.Errno = 1108
 	ERROR_UNABLE_TO_UNLOAD_MEDIA                                              syscall.Errno = 1109
-	ERROR_MEDIA_CHANGED                                                       syscall.Errno = 1110
-	ERROR_BUS_RESET                                                           syscall.Errno = 1111
-	ERROR_NO_MEDIA_IN_DRIVE                                                   syscall.Errno = 1112
-	ERROR_NO_UNICODE_TRANSLATION                                              syscall.Errno = 1113
-	ERROR_DLL_INIT_FAILED                                                     syscall.Errno = 1114
-	ERROR_SHUTDOWN_IN_PROGRESS                                                syscall.Errno = 1115
-	ERROR_NO_SHUTDOWN_IN_PROGRESS                                             syscall.Errno = 1116
-	ERROR_IO_DEVICE                                                           syscall.Errno = 1117
-	ERROR_SERIAL_NO_DEVICE                                                    syscall.Errno = 1118
-	ERROR_IRQ_BUSY                                                            syscall.Errno = 1119
+	ERROR_MEDIA_CHANGED                                                       syscall.Errno = ***REMOVED***0
+	ERROR_BUS_RESET                                                           syscall.Errno = ***REMOVED***1
+	ERROR_NO_MEDIA_IN_DRIVE                                                   syscall.Errno = ***REMOVED***2
+	ERROR_NO_UNICODE_TRANSLATION                                              syscall.Errno = ***REMOVED***3
+	ERROR_DLL_INIT_FAILED                                                     syscall.Errno = ***REMOVED***4
+	ERROR_SHUTDOWN_IN_PROGRESS                                                syscall.Errno = ***REMOVED***5
+	ERROR_NO_SHUTDOWN_IN_PROGRESS                                             syscall.Errno = ***REMOVED***6
+	ERROR_IO_DEVICE                                                           syscall.Errno = ***REMOVED***7
+	ERROR_SERIAL_NO_DEVICE                                                    syscall.Errno = ***REMOVED***8
+	ERROR_IRQ_BUSY                                                            syscall.Errno = ***REMOVED***9
 	ERROR_MORE_WRITES                                                         syscall.Errno = 1120
 	ERROR_COUNTER_TIMEOUT                                                     syscall.Errno = 1121
 	ERROR_FLOPPY_ID_MARK_NOT_FOUND                                            syscall.Errno = 1122
@@ -2470,7 +2470,7 @@ const (
 	DNS_ERROR_KSP_DOES_NOT_SUPPORT_PROTECTION                                 syscall.Errno = 9108
 	DNS_ERROR_UNEXPECTED_DATA_PROTECTION_ERROR                                syscall.Errno = 9109
 	DNS_ERROR_UNEXPECTED_CNG_ERROR                                            syscall.Errno = 9110
-	DNS_ERROR_UNKNOWN_SIGNING_PARAMETER_VERSION                               syscall.Errno = 9111
+	DNS_ERROR_UNKNOWN_SIGNING_PARAMETER_VERSION                               syscall.Errno = 9***REMOVED***
 	DNS_ERROR_KSP_NOT_ACCESSIBLE                                              syscall.Errno = 9112
 	DNS_ERROR_TOO_MANY_SKDS                                                   syscall.Errno = 9113
 	DNS_ERROR_INVALID_ROLLOVER_PERIOD                                         syscall.Errno = 9114
@@ -2701,7 +2701,7 @@ const (
 	WSASERVICE_NOT_FOUND                                                      syscall.Errno = 10108
 	WSATYPE_NOT_FOUND                                                         syscall.Errno = 10109
 	WSA_E_NO_MORE                                                             syscall.Errno = 10110
-	WSA_E_CANCELLED                                                           syscall.Errno = 10111
+	WSA_E_CANCELLED                                                           syscall.Errno = 10***REMOVED***
 	WSAEREFUSED                                                               syscall.Errno = 10112
 	WSAHOST_NOT_FOUND                                                         syscall.Errno = 11001
 	WSATRY_AGAIN                                                              syscall.Errno = 11002
@@ -3054,7 +3054,7 @@ const (
 	ERROR_MUI_INTLSETTINGS_UILANG_NOT_INSTALLED                               syscall.Errno = 15107
 	ERROR_MUI_INTLSETTINGS_INVALID_LOCALE_NAME                                syscall.Errno = 15108
 	ERROR_MRM_RUNTIME_NO_DEFAULT_OR_NEUTRAL_RESOURCE                          syscall.Errno = 15110
-	ERROR_MRM_INVALID_PRICONFIG                                               syscall.Errno = 15111
+	ERROR_MRM_INVALID_PRICONFIG                                               syscall.Errno = 15***REMOVED***
 	ERROR_MRM_INVALID_FILE_TYPE                                               syscall.Errno = 15112
 	ERROR_MRM_UNKNOWN_QUALIFIER                                               syscall.Errno = 15113
 	ERROR_MRM_INVALID_QUALIFIER_VALUE                                         syscall.Errno = 15114
@@ -3332,7 +3332,7 @@ const (
 	CLASSFACTORY_S_FIRST                                                      syscall.Errno = 0x00040110
 	CLASSFACTORY_S_LAST                                                       syscall.Errno = 0x0004011F
 	CLASS_E_NOAGGREGATION                                                     Handle        = 0x80040110
-	CLASS_E_CLASSNOTAVAILABLE                                                 Handle        = 0x80040111
+	CLASS_E_CLASSNOTAVAILABLE                                                 Handle        = 0x80040***REMOVED***
 	CLASS_E_NOTLICENSED                                                       Handle        = 0x80040112
 	MARSHAL_E_FIRST                                                           syscall.Errno = 0x80040120
 	MARSHAL_E_LAST                                                            syscall.Errno = 0x8004012F
@@ -3780,7 +3780,7 @@ const (
 	STG_E_EXTANTMARSHALLINGS                                                  Handle        = 0x80030108
 	STG_E_DOCFILECORRUPT                                                      Handle        = 0x80030109
 	STG_E_BADBASEADDRESS                                                      Handle        = 0x80030110
-	STG_E_DOCFILETOOLARGE                                                     Handle        = 0x80030111
+	STG_E_DOCFILETOOLARGE                                                     Handle        = 0x80030***REMOVED***
 	STG_E_NOTSIMPLEFORMAT                                                     Handle        = 0x80030112
 	STG_E_INCOMPLETE                                                          Handle        = 0x80030201
 	STG_E_TERMINATED                                                          Handle        = 0x80030202
@@ -3837,7 +3837,7 @@ const (
 	RPC_E_WRONG_THREAD                                                        Handle        = 0x8001010E
 	RPC_E_THREAD_NOT_INIT                                                     Handle        = 0x8001010F
 	RPC_E_VERSION_MISMATCH                                                    Handle        = 0x80010110
-	RPC_E_INVALID_HEADER                                                      Handle        = 0x80010111
+	RPC_E_INVALID_HEADER                                                      Handle        = 0x80010***REMOVED***
 	RPC_E_INVALID_EXTENSION                                                   Handle        = 0x80010112
 	RPC_E_INVALID_IPID                                                        Handle        = 0x80010113
 	RPC_E_INVALID_OBJECT                                                      Handle        = 0x80010114
@@ -4277,7 +4277,7 @@ const (
 	CERT_E_REVOCATION_FAILURE                                                 Handle        = 0x800B010E
 	CERT_E_CN_NO_MATCH                                                        Handle        = 0x800B010F
 	CERT_E_WRONG_USAGE                                                        Handle        = 0x800B0110
-	TRUST_E_EXPLICIT_DISTRUST                                                 Handle        = 0x800B0111
+	TRUST_E_EXPLICIT_DISTRUST                                                 Handle        = 0x800B0***REMOVED***
 	CERT_E_UNTRUSTEDCA                                                        Handle        = 0x800B0112
 	CERT_E_INVALID_POLICY                                                     Handle        = 0x800B0113
 	CERT_E_INVALID_NAME                                                       Handle        = 0x800B0114
@@ -4648,7 +4648,7 @@ const (
 	ERROR_GRAPHICS_UNSWIZZLING_APERTURE_UNSUPPORTED                           Handle        = 0xC0262108
 	ERROR_GRAPHICS_CANT_EVICT_PINNED_ALLOCATION                               Handle        = 0xC0262109
 	ERROR_GRAPHICS_INVALID_ALLOCATION_USAGE                                   Handle        = 0xC0262110
-	ERROR_GRAPHICS_CANT_RENDER_LOCKED_ALLOCATION                              Handle        = 0xC0262111
+	ERROR_GRAPHICS_CANT_RENDER_LOCKED_ALLOCATION                              Handle        = 0xC0262***REMOVED***
 	ERROR_GRAPHICS_ALLOCATION_CLOSED                                          Handle        = 0xC0262112
 	ERROR_GRAPHICS_INVALID_ALLOCATION_INSTANCE                                Handle        = 0xC0262113
 	ERROR_GRAPHICS_INVALID_ALLOCATION_HANDLE                                  Handle        = 0xC0262114
@@ -5066,7 +5066,7 @@ const (
 	TPMAPI_E_INVALID_ENCODING                                                 Handle        = 0x8029010E
 	TPMAPI_E_INVALID_KEY_SIZE                                                 Handle        = 0x8029010F
 	TPMAPI_E_ENCRYPTION_FAILED                                                Handle        = 0x80290110
-	TPMAPI_E_INVALID_KEY_PARAMS                                               Handle        = 0x80290111
+	TPMAPI_E_INVALID_KEY_PARAMS                                               Handle        = 0x80290***REMOVED***
 	TPMAPI_E_INVALID_MIGRATION_AUTHORIZATION_BLOB                             Handle        = 0x80290112
 	TPMAPI_E_INVALID_PCR_INDEX                                                Handle        = 0x80290113
 	TPMAPI_E_INVALID_DELEGATE_BLOB                                            Handle        = 0x80290114
@@ -5185,7 +5185,7 @@ const (
 	PLA_E_EXE_FULL_PATH_REQUIRED                                              Handle        = 0x8030010E
 	PLA_E_INVALID_SESSION_NAME                                                Handle        = 0x8030010F
 	PLA_E_PLA_CHANNEL_NOT_ENABLED                                             Handle        = 0x80300110
-	PLA_E_TASKSCHED_CHANNEL_NOT_ENABLED                                       Handle        = 0x80300111
+	PLA_E_TASKSCHED_CHANNEL_NOT_ENABLED                                       Handle        = 0x80300***REMOVED***
 	PLA_E_RULES_MANAGER_FAILED                                                Handle        = 0x80300112
 	PLA_E_CABAPI_FAILURE                                                      Handle        = 0x80300113
 	FVE_E_LOCKED_VOLUME                                                       Handle        = 0x80310000
@@ -5655,7 +5655,7 @@ const (
 	ERROR_VMCOMPUTE_SYSTEM_NOT_FOUND                                          syscall.Errno = 0xC037010E
 	ERROR_VMCOMPUTE_SYSTEM_ALREADY_EXISTS                                     syscall.Errno = 0xC037010F
 	ERROR_VMCOMPUTE_SYSTEM_ALREADY_STOPPED                                    syscall.Errno = 0xC0370110
-	ERROR_VMCOMPUTE_PROTOCOL_ERROR                                            syscall.Errno = 0xC0370111
+	ERROR_VMCOMPUTE_PROTOCOL_ERROR                                            syscall.Errno = 0xC0370***REMOVED***
 	ERROR_VMCOMPUTE_INVALID_LAYER                                             syscall.Errno = 0xC0370112
 	ERROR_VMCOMPUTE_WINDOWS_INSIDER_REQUIRED                                  syscall.Errno = 0xC0370113
 	HCS_E_TERMINATED_DURING_START                                             Handle        = 0x80370100
@@ -5673,7 +5673,7 @@ const (
 	HCS_E_SYSTEM_NOT_FOUND                                                    Handle        = 0x8037010E
 	HCS_E_SYSTEM_ALREADY_EXISTS                                               Handle        = 0x8037010F
 	HCS_E_SYSTEM_ALREADY_STOPPED                                              Handle        = 0x80370110
-	HCS_E_PROTOCOL_ERROR                                                      Handle        = 0x80370111
+	HCS_E_PROTOCOL_ERROR                                                      Handle        = 0x80370***REMOVED***
 	HCS_E_INVALID_LAYER                                                       Handle        = 0x80370112
 	HCS_E_WINDOWS_INSIDER_REQUIRED                                            Handle        = 0x80370113
 	HCS_E_SERVICE_NOT_AVAILABLE                                               Handle        = 0x80370114
@@ -5907,7 +5907,7 @@ const (
 	WPN_E_CLOUD_AUTH_UNAVAILABLE                                              Handle        = 0x803E011A
 	WPN_E_CLOUD_SERVICE_UNAVAILABLE                                           Handle        = 0x803E011B
 	WPN_E_FAILED_LOCK_SCREEN_UPDATE_INTIALIZATION                             Handle        = 0x803E011C
-	WPN_E_NOTIFICATION_DISABLED                                               Handle        = 0x803E0111
+	WPN_E_NOTIFICATION_DISABLED                                               Handle        = 0x803E0***REMOVED***
 	WPN_E_NOTIFICATION_INCAPABLE                                              Handle        = 0x803E0112
 	WPN_E_INTERNET_INCAPABLE                                                  Handle        = 0x803E0113
 	WPN_E_NOTIFICATION_TYPE_DISABLED                                          Handle        = 0x803E0114

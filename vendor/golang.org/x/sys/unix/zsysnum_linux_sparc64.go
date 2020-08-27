@@ -101,7 +101,7 @@ const (
 	SYS_SETRESUID              = 108
 	SYS_GETRESUID              = 109
 	SYS_SETRESGID              = 110
-	SYS_GETRESGID              = 111
+	SYS_GETRESGID              = ***REMOVED***
 	SYS_RECVMSG                = 113
 	SYS_SENDMSG                = 114
 	SYS_GETTIMEOFDAY           = 116

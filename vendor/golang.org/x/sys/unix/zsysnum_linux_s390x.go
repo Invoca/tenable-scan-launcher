@@ -83,7 +83,7 @@ const (
 	SYS_LSTAT                  = 107
 	SYS_FSTAT                  = 108
 	SYS_LOOKUP_DCOOKIE         = 110
-	SYS_VHANGUP                = 111
+	SYS_VHANGUP                = ***REMOVED***
 	SYS_IDLE                   = 112
 	SYS_WAIT4                  = 114
 	SYS_SWAPOFF                = 115

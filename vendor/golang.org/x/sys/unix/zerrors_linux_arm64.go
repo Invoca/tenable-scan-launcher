@@ -2096,7 +2096,7 @@ const (
 	SOL_NFC                              = 0x118
 	SOL_PACKET                           = 0x107
 	SOL_PNPIPE                           = 0x113
-	SOL_PPPOL2TP                         = 0x111
+	SOL_PPPOL2TP                         = 0x***REMOVED***
 	SOL_RAW                              = 0xff
 	SOL_RDS                              = 0x114
 	SOL_RXRPC                            = 0x110
@@ -2944,7 +2944,7 @@ var errorList = [...]struct {
 	{108, "ESHUTDOWN", "cannot send after transport endpoint shutdown"},
 	{109, "ETOOMANYREFS", "too many references: cannot splice"},
 	{110, "ETIMEDOUT", "connection timed out"},
-	{111, "ECONNREFUSED", "connection refused"},
+	{***REMOVED***, "ECONNREFUSED", "connection refused"},
 	{112, "EHOSTDOWN", "host is down"},
 	{113, "EHOSTUNREACH", "no route to host"},
 	{114, "EALREADY", "operation already in progress"},

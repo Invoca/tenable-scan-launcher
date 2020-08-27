@@ -1300,7 +1300,7 @@ var errorList = [...]struct {
 	{95, "EOWNERDEAD", "previous owner died "},
 	{109, "ENOSYS", "function not implemented"},
 	{110, "EMEDIA", "media surface error"},
-	{111, "ESOFT", "I/O completed, but needs relocation"},
+	{***REMOVED***, "ESOFT", "I/O completed, but needs relocation"},
 	{112, "ENOATTR", "no attribute found"},
 	{113, "ESAD", "security Authentication Denied"},
 	{114, "ENOTRUST", "not a Trusted Program"},

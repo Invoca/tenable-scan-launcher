@@ -87,7 +87,7 @@ const (
 	SYS_STAT                         = 106
 	SYS_LSTAT                        = 107
 	SYS_FSTAT                        = 108
-	SYS_VHANGUP                      = 111
+	SYS_VHANGUP                      = ***REMOVED***
 	SYS_WAIT4                        = 114
 	SYS_SWAPOFF                      = 115
 	SYS_SYSINFO                      = 116

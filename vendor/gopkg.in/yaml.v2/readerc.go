@@ -168,8 +168,8 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 				//   --------------------+------------------------------------
 				//   0000 0000-0000 007F | 0xxxxxxx
 				//   0000 0080-0000 07FF | 110xxxxx 10xxxxxx
-				//   0000 0800-0000 FFFF | 1110xxxx 10xxxxxx 10xxxxxx
-				//   0001 0000-0010 FFFF | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+				//   0000 0800-0000 FFFF | ***REMOVED***0xxxx 10xxxxxx 10xxxxxx
+				//   0001 0000-0010 FFFF | ***REMOVED***10xxx 10xxxxxx 10xxxxxx 10xxxxxx
 				//
 				// Additionally, the characters in the range 0xD800-0xDFFF
 				// are prohibited as they are reserved for use with UTF-16
@@ -278,7 +278,7 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 				//  U  = U' + 0x10000   (0x01 00 00 <= U <= 0x10 FF FF)
 				//  U' = yyyyyyyyyyxxxxxxxxxx   (0 <= U' <= 0x0F FF FF)
 				//  W1 = 110110yyyyyyyyyy
-				//  W2 = 110111xxxxxxxxxx
+				//  W2 = 110***REMOVED***xxxxxxxxxx
 				//
 				// where U is the character value, W1 is the high surrogate
 				// area, W2 is the low surrogate area.
@@ -373,13 +373,13 @@ func yaml_parser_update_buffer(parser *yaml_parser_t, length int) bool {
 				parser.buffer[buffer_len+1] = byte(0x80 + (value & 0x3F))
 				buffer_len += 2
 			} else if value <= 0xFFFF {
-				// 0000 0800-0000 FFFF . 1110xxxx 10xxxxxx 10xxxxxx
+				// 0000 0800-0000 FFFF . ***REMOVED***0xxxx 10xxxxxx 10xxxxxx
 				parser.buffer[buffer_len+0] = byte(0xE0 + (value >> 12))
 				parser.buffer[buffer_len+1] = byte(0x80 + ((value >> 6) & 0x3F))
 				parser.buffer[buffer_len+2] = byte(0x80 + (value & 0x3F))
 				buffer_len += 3
 			} else {
-				// 0001 0000-0010 FFFF . 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+				// 0001 0000-0010 FFFF . ***REMOVED***10xxx 10xxxxxx 10xxxxxx 10xxxxxx
 				parser.buffer[buffer_len+0] = byte(0xF0 + (value >> 18))
 				parser.buffer[buffer_len+1] = byte(0x80 + ((value >> 12) & 0x3F))
 				parser.buffer[buffer_len+2] = byte(0x80 + ((value >> 6) & 0x3F))

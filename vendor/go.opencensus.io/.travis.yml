@@ -7,7 +7,7 @@ go:
 
 env:
   global:
-    GO111MODULE=on
+    GO***REMOVED***MODULE=on
 
 before_script:
   - make install-tools

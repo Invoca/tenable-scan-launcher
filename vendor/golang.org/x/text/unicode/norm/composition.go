@@ -319,7 +319,7 @@ const (
 	jamoLBase  = 0x1100 // UTF-8(jamoLBase) -> E1 84 00
 	jamoLBase0 = 0xE1
 	jamoLBase1 = 0x84
-	jamoLEnd   = 0x1113
+	jamoLEnd   = 0x***REMOVED***3
 	jamoVBase  = 0x1161
 	jamoVEnd   = 0x1176
 	jamoTBase  = 0x11A7

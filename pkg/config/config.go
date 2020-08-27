@@ -20,7 +20,6 @@ type TenableConfig struct {
 type GCloudConfig struct {
 	ServiceAccountPath string
 	ProjectName        string
-	Concurrency		   int
 }
 
 type BaseConfig struct {

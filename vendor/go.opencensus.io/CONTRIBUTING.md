@@ -60,4 +60,4 @@ Open a pull request against the main opencensus-go repo.
 This project uses Appveyor and Travis for CI.
 
 The dependencies are managed with `go mod` if you work with the sources under your
-`$GOPATH` you need to set the environment variable `GO111MODULE=on`.
+`$GOPATH` you need to set the environment variable `GO***REMOVED***MODULE=on`.
