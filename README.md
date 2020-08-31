@@ -37,10 +37,10 @@ The following Tenable flags are needed to preform a scan:
 
 |Flag|Description|
 |---|---|
-|`--generate_report`|Generates a report|
+|`--generate_report`|Generates a report. Supported values are `true` or `false`. Defaults to false.|
 |`--format`|Specifies the format of the report. Formats are Nessus, HTML, PDF, CSV, or DB. Defaults to empty string|
 |`--report-file-location`|The file location to save the file|
-|`--chapters`|Specify which chapters of the report to use. Supported chapters are vuln_hosts_summary, vuln_by_host, compliance_exec, remediations, vuln_by_plugin, compliance. Defaults to empty string.|
+|`--chapters`|Specify which chapters of the report to use. Supported chapters are `vuln_hosts_summary`, `vuln_by_host`, `compliance_exec`, `remediations`, `vuln_by_plugin`, `compliance`. Has to be a semi-colon delimited list. Defaults to empty string.|
 |`--summary-report`|Only includes the `vuln_hosts_summary` chapter|
 |`--full-report`|Includes all chapters|
 
