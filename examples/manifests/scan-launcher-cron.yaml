@@ -1,0 +1,22 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: tenable-scan-launcher
+  namespace: $NAMESPACE
+spec:
+  schedule: "$CRON_SCHEDULE"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: scanner
+            image: invocaops:tenable-scan-launcher
+            args:
+              - --tenable-access-key=$TENABLE_ACCESS_KEY
+              - --tenable-secret-key=$TENABLE_SECRET_KEY
+              - --tenable-scan-id=$TENABLE_SCAN_ID
+              - --include-aws
+              - --include-gcloud
+              - --gcloud-service-account-path=$GCLOUD_PATH
+              - --gcloud-project=$GCLOUD_PROJECT

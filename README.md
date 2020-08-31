@@ -38,17 +38,22 @@ The following Tenable flags are needed to preform a scan:
 |Flag|Description|
 |---|---|
 |`--generate_report`|Generates a report|
-|`--format`|Optionally specify a format of the report
+|`--format`|Specifies the format of the report. Formats are Nessus, HTML, PDF, CSV, or DB. Defaults to empty string|
 |`--report-file-location`|The file location to save the file|
-|`--chapters`|Specify which chapters of the report to use|
-|`--summary-report`|Only includes the `vuln_hosts_summary` chapter
+|`--chapters`|Specify which chapters of the report to use. Supported chapters are vuln_hosts_summary, vuln_by_host, compliance_exec, remediations, vuln_by_plugin, compliance. Defaults to empty string.|
+|`--summary-report`|Only includes the `vuln_hosts_summary` chapter|
 |`--full-report`|Includes all chapters|
 
 Note that `--summary-report` will override `--chapters` and `--full-report` overrides `--summary-report`
 
 #### Filtering
-In order to filter on the severity within the report, include the `--[low,medium,high,critical]_severity` flags. One can
-also change the search type with `--search_type`. It is not recommended to change it to the `and` type. 
+In order to filter on the severity within the report, include the `--[low,medium,high,critical]_severity` flags. The
+search filter can be modified with `--search_type`. The supported values are `and` and `or`. It is not recommended 
+changing it to the `and` type since each vulnerability can only have a single severity level. 
+
+#### Logging
+Log level can be specified with `--log-level`. The levels are trace, info, fatal, panic, warn, and debug. Log format can
+be specified with `--log-type`. The supported types are `json`, and `text`. 
 
 
 ## Contributions
