@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nessus-scanner
+  name: nessus-scanner
+  namespace: $NAMESPACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nessus-scanner
+  template:
+    labels:
+      app: nessus-scanner
+    spec:
+      containers:
+        - env:
+          - name: LINKING_KEY
+            value: $LINKING_KEY
+          - name: SCANNER_NAME
+            value: $SCANNER_NAME
+          image: stevemcgrath/nessus_scanner:latest
+          imagePullPolicy: Always
+          name: nessus-scanner
+      restartPolicy: Always
