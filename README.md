@@ -1,5 +1,5 @@
 # Tenable-Scan-Launcher [![Build Status](https://travis-ci.org/Invoca/tenable-scan-launcher.svg?branch=master)](https://travis-ci.org/Invoca/tenable-scan-launcher) [![Coverage Status](https://coveralls.io/repos/github/Invoca/tenable-scan-launcher/badge.svg?branch=master)](https://coveralls.io/github/Invoca/tenable-scan-launcher?branch=master)
-This scan launcher collects the private ip addresses of Google Cloud and AWS instances and then launches a tenable scan
+This scan launcher collects the private IP addresses of Google Cloud and AWS instances and then launches a tenable scan
 with the option to downlaod the scan as a pdf. 
 
 ## Installation
@@ -22,22 +22,31 @@ Shell:
 ```
 
 ### Flags
-The scanner will list private ips from all regions of each cloud provider given. To enable AWS, include the 
+The scanner will list private IPs from all regions of each cloud provider given. To enable AWS, include the 
 `--include_aws` flag. It will use the shared aws configuration settings, so it will use the standard order of precedence
 for AWS service accounts. To include Google Cloud, use the `--include_gcloud` flag and be sure to specify the service 
 account file location with `--gcloud_json` and the desired project with `--gcloud_project`.
 
 The following Tenable flags are needed to preform a scan:
-`--tenable-access-key` which is the access key generated from https://cloud.tenable.com/#/ . 
-`--tenable-secret-key` is the secret key generated from https://cloud.tenable.com/#/
-`--scanner_id` is the scanner to id of the scanner to use.
 
-To generate a report, include the `--generate_report` flag. To specify a format of the report include the `--format` 
-flag with the desired format. `--report-file-location` spcifies the file location to save the file. To specify which 
-chapters of the report to use, use the `--chapters` flag with the desired chapters. `--summary-report` only includes 
-the `vuln_hosts_summary` chapter while `--full-report` includes all of them. Note that `--summary-report` will override 
-`--chapters` and `--full-report` overrides `--summary-report`.
+* `--tenable-access-key` which is the access key generated from https://cloud.tenable.com/#/ . 
+* `--tenable-secret-key` is the secret key generated from https://cloud.tenable.com/#/
+* `--scanner_id` is the scanner to id of the scanner to use.
 
+#### Reports
+
+|Flag|Description|
+|---|---|
+|`--generate_report`|Generates a report|
+|`--format`|Optionally specify a format of the report
+|`--report-file-location`|The file location to save the file|
+|`--chapters`|Specify which chapters of the report to use|
+|`--summary-report`|Only includes the `vuln_hosts_summary` chapter
+|`--full-report`|Includes all chapters|
+
+Note that `--summary-report` will override `--chapters` and `--full-report` overrides `--summary-report`
+
+#### Filtering
 In order to filter on the severity within the report, include the `--[low,medium,high,critical]_severity` flags. One can
 also change the search type with `--search_type`. It is not recommended to change it to the `and` type. 
 
