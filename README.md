@@ -10,7 +10,8 @@ git clone git@github.com:Invoca/tenable-scan-launcher.git
 
 ## Usage
 ### Running
-There are two methods to run the scan launcher. With Docker or by running the executable file. 
+There are three methods to run the scan launcher. With Docker, the executable file, and in Kubernetes. To run it in
+kubernetes, modify the manifests in the `examples/manifests` directory and then apply them.  
 Docker:
 ```shell script
     docker run invoca:SOMETHING   
