@@ -1,6 +1,6 @@
 # Tenable-Scan-Launcher [![Build Status](https://travis-ci.org/Invoca/tenable-scan-launcher.svg?branch=master)](https://travis-ci.org/Invoca/tenable-scan-launcher) [![Coverage Status](https://coveralls.io/repos/github/Invoca/tenable-scan-launcher/badge.svg?branch=master)](https://coveralls.io/github/Invoca/tenable-scan-launcher?branch=master)
 This scan launcher collects the private IP addresses of Google Cloud and AWS instances and then launches a tenable scan
-with the option to downlaod the scan as a pdf. 
+with the option to download the scan as a pdf. 
 
 ## Installation
 Installing this repo is as simple as cloning the repo into your $Go/src/github.com directory. 
