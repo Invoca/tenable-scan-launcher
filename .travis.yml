@@ -6,5 +6,5 @@ services:
 script:
   - make test
   - make build
-  after_success:
-  - make push-image
+after_success:
+  - make build-and-push-image
