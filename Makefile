@@ -14,7 +14,7 @@ build:
 	go build -mod=readonly -o $(PWD)/tenable-scan-launcher $(PWD)/cmd/tenable-scan-launcher
 
 build-and-push-image:
-    @echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin quay.io
+	@echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin quay.io
 	docker build -f Dockerfile -t quay.io/invoca/tenable-scan-launcher:$(TAG) .
 	echo "Pushing quay.io/invoca/tenable-scan-launcher:$(TAG)"
 	docker push quay.io/invoca/tenable-scan-launcher
