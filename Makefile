@@ -18,7 +18,7 @@ build:
 	go build -mod=readonly -o $(PWD)/tenable-scan-launcher $(PWD)/cmd/tenable-scan-launcher
 
 build-and-push-image:
-	@echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin
-	docker build -f Dockerfile -t invocaops/tenable-scan-launcher:latest -t invocaops/tenable-scan-launcher:$(VERSION) .
-	echo "Pushing invocaops/tenable-scan-launcher:$(VERSION) and invocaops/tenable-scan-launcher:latest"
-	docker push invocaops/tenable-scan-launcher
+	@echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin quay.io
+	docker build -f Dockerfile -t quay.io/invoca/tenable-scan-launcher:latest -t quay.io/invoca/tenable-scan-launcher:$(VERSION) .
+	echo "Pushing quay.io/invoca/tenable-scan-launcher:$(VERSION) and quay.io/invoca/tenable-scan-launcher:latest"
+	docker push quay.io/invoca/tenable-scan-launcher
