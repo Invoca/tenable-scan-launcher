@@ -13,8 +13,7 @@ build:
 	go fmt ./pkg/... ./cmd/...
 	go vet ./pkg/... ./cmd/...
 	go mod tidy
-	ls $(GOPATH)/bin/
-	$(GOPATH)/bin/goveralls -service=travis-ci
+	$(GOPATH)/bin/goveralls -service=travis-ci -debug
 	go build -mod=readonly -o $(PWD)/tenable-scan-launcher $(PWD)/cmd/tenable-scan-launcher
 
 build-and-push-image:
