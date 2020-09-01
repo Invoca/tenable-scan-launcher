@@ -1,6 +1,5 @@
 .PHONY: test build build-and-push-image
 
-VERSION := `git fetch --tags && git tag | sort -V | tail -1`
 PKG=github.com/invoca/tenable-scan-launcher
 
 test:
@@ -17,5 +16,5 @@ build:
 build-and-push-image:
 	@echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin quay.io
 	docker build -f Dockerfile -t quay.io/invoca/tenable-scan-launcher:latest -t quay.io/invoca/tenable-scan-launcher:$(VERSION) .
-	echo "Pushing quay.io/invoca/tenable-scan-launcher:$(VERSION) and quay.io/invoca/tenable-scan-launcher:latest"
+	echo "Pushing quay.io/invoca/tenable-scan-launcher:$(TRAVIS_BRANCH) and quay.io/invoca/tenable-scan-launcher:latest"
 	docker push quay.io/invoca/tenable-scan-launcher
