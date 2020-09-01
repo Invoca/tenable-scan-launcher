@@ -15,6 +15,6 @@ build:
 
 build-and-push-image:
 	@echo "$(DOCKER_PASSWORD)" | docker login -u "$(DOCKER_USERNAME)" --password-stdin quay.io
-	docker build -f Dockerfile -t quay.io/invoca/tenable-scan-launcher:latest -t quay.io/invoca/tenable-scan-launcher:$(VERSION) .
+	docker build -f Dockerfile -t quay.io/invoca/tenable-scan-launcher:latest -t quay.io/invoca/tenable-scan-launcher:$(TRAVIS_BRANCH) .
 	echo "Pushing quay.io/invoca/tenable-scan-launcher:$(TRAVIS_BRANCH) and quay.io/invoca/tenable-scan-launcher:latest"
 	docker push quay.io/invoca/tenable-scan-launcher
