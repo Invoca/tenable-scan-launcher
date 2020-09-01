@@ -12,7 +12,7 @@ RUN go build -mod=readonly -o /tenable-scan-launcher $PWD/cmd/tenable-scan-launc
 
 FROM gcr.io/distroless/static:latest
 
-COPY --from=build /go/src/invoca/tenable-scan-launcher/tenable-scan-launcher /
+COPY --from=build /tenable-scan-launcher /
 
 USER 65534
 
