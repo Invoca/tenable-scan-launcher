@@ -1,21 +1,25 @@
 package aws
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
-	log "github.com/sirupsen/logrus"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	log "github.com/sirupsen/logrus"
 )
 
-type AWSEc2 struct {
+type AwsSvc struct {
 	IPs    []string
 	Ec2svc ec2iface.EC2API
+	//s3Manager *s3manager.Uploader
+	s3Manager s3Wrapper
 }
 
-func (m *AWSEc2) Setup(config *config.BaseConfig) error {
+func (m *AwsSvc) Setup(config *config.BaseConfig) error {
 	if config.IncludeAWS == false {
 		return fmt.Errorf("Setup: AWS is not supposed to be included")
 	}
@@ -25,10 +29,12 @@ func (m *AWSEc2) Setup(config *config.BaseConfig) error {
 	}))
 
 	m.Ec2svc = ec2.New(sess)
+	m.s3Manager = s3manager.NewUploader(sess)
+
 	return nil
 }
 
-func (m *AWSEc2) GatherIPs() ([]string, error) {
+func (m *AwsSvc) GatherIPs() ([]string, error) {
 	log.Debug("Getting AWS IPs")
 
 	if m.Ec2svc == nil {
@@ -48,7 +54,7 @@ func (m *AWSEc2) GatherIPs() ([]string, error) {
 	return m.IPs, nil
 }
 
-func (m *AWSEc2) getInstances() ([]*ec2.Reservation, error) {
+func (m *AwsSvc) getInstances() ([]*ec2.Reservation, error) {
 
 	if m.Ec2svc == nil {
 		return nil, fmt.Errorf("getInstances: Passed empty ec2iface object")
@@ -65,7 +71,7 @@ func (m *AWSEc2) getInstances() ([]*ec2.Reservation, error) {
 	return resp.Reservations, nil
 }
 
-func (m *AWSEc2) parseInstances(reservations []*ec2.Reservation) error {
+func (m *AwsSvc) parseInstances(reservations []*ec2.Reservation) error {
 	var privateIps []string
 
 	if reservations == nil {
@@ -88,4 +94,22 @@ func (m *AWSEc2) parseInstances(reservations []*ec2.Reservation) error {
 
 	m.IPs = privateIps
 	return nil
+}
+
+func (a *AwsSvc) UploadFile(s3Key string, bucketName string, data []byte) error {
+	_, err := a.s3Manager.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(bucketName),
+		Key:    aws.String(s3Key),
+		Body:   bytes.NewReader(data),
+	})
+
+	if err != nil {
+		return fmt.Errorf("GetFileFromS3: Error getting resp from s3")
+	}
+
+	return nil
+}
+
+type s3Wrapper interface {
+	Upload(input *s3manager.UploadInput, options ...func(*s3manager.Uploader)) (*s3manager.UploadOutput, error)
 }
