@@ -23,3 +23,8 @@ func (m *MockCloudAPI) GatherIPs() ([]string, error) {
 	log.Debug(args)
 	return m.IPs, args.Error(1)
 }
+
+func (m *MockCloudAPI) UploadFile(s3Key string, bucketName string, data []byte) error {
+	args := m.Called()
+	return args.Error(0)
+}

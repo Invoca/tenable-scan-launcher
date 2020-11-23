@@ -8,33 +8,40 @@ import (
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
+	"time"
 )
 
 type Runner struct {
-	ec2Svc         wrapper.CloudWrapper
+	awsSvc         wrapper.CloudWrapper
 	gcloud         wrapper.CloudWrapper
 	tenable        wrapper.Tenable
 	includeGCloud  bool
 	includeAWS     bool
 	generateReport bool
+	fileLocation   string
+	storeName      string
+	fileName       string
+	osFs           afero.Fs
 }
 
 func (r *Runner) SetupRunner(config *config.BaseConfig) error {
 
 	r.includeAWS = config.IncludeAWS
 	r.includeGCloud = config.IncludeGCloud
+	r.osFs = afero.NewOsFs()
 
 	if config.TenableConfig == nil {
 		return fmt.Errorf("SetupRunner: TenableConfig in config cannot be nil")
 	}
 
 	if r.includeAWS {
-		ec2Svc := &aws.AWSEc2{}
+		ec2Svc := &aws.AwsSvc{}
 		err := ec2Svc.Setup(config)
 		if err != nil {
 			return fmt.Errorf("SetupRunner: Error setting up AWS")
 		}
-		r.ec2Svc = ec2Svc
+		r.awsSvc = ec2Svc
 	}
 
 	if r.includeGCloud {
@@ -55,6 +62,7 @@ func (r *Runner) SetupRunner(config *config.BaseConfig) error {
 	r.tenable = tenableClient
 
 	r.generateReport = config.TenableConfig.GenerateReport
+	r.fileLocation = config.TenableConfig.FilePath
 	return nil
 }
 
@@ -101,6 +109,23 @@ func (r *Runner) Run() error {
 			return fmt.Errorf("Run: Error Downloading Export %s", err)
 		}
 		log.Debug("File successfully downloaded")
+
+		data, err := r.osFs.Open(r.fileLocation)
+		if err != nil {
+			return fmt.Errorf("Run: Error opening file %s	", err)
+		}
+
+		var fileData []byte
+
+		_, err = data.Read(fileData)
+		if err != nil {
+			return fmt.Errorf("Run: Error reading file %s", err)
+		}
+
+		err = r.awsSvc.UploadFile(r.storeName, r.fileName+"-"+time.Now().String()+".pdf", fileData)
+		if err != nil {
+			return fmt.Errorf("Run: Error uploading object %s", err)
+		}
 	}
 
 	log.Debug("Run Finished")
@@ -126,7 +151,7 @@ func (r *Runner) getIPs() error {
 
 	if r.includeAWS {
 		log.Debug("Gathering AWS IPs")
-		awsIPs, err := r.ec2Svc.GatherIPs()
+		awsIPs, err := r.awsSvc.GatherIPs()
 		if err != nil {
 			return fmt.Errorf("getIPs: Error retrieving AWS IPs %s", err)
 		}

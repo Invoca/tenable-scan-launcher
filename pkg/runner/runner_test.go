@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Invoca/tenable-scan-launcher/pkg/mocks"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"strconv"
@@ -22,10 +23,6 @@ func TestRun(t *testing.T) {
 	gcloudInstances := []string{"1.1.1.1"}
 	awsInstances := []string{"2.2.2.2"}
 
-	//instanceList := []string{"1.1.1.1", "2.2.2.2"}
-
-	//instanceList = append(gcloudInstances, awsInstances...)
-
 	ec2Mock := &mocks.MockCloudAPI{}
 
 	gcloudMock := &mocks.MockCloudAPI{}
@@ -33,13 +30,19 @@ func TestRun(t *testing.T) {
 	tenableMock := &mocks.MockTenableAPI{}
 
 	runner := Runner{
-		ec2Svc:         ec2Mock,
+		awsSvc:         ec2Mock,
 		gcloud:         gcloudMock,
 		tenable:        tenableMock,
 		includeGCloud:  true,
 		includeAWS:     true,
 		generateReport: true,
+		osFs:           afero.NewMemMapFs(),
+		fileLocation:   "/tmp/report",
 	}
+
+	file, _ := runner.osFs.Create(runner.fileLocation)
+	file.Write([]byte(""))
+	file.Close()
 
 	testCases := []testCase{
 		{
@@ -61,6 +64,7 @@ func TestRun(t *testing.T) {
 				tenableMock.On("StartExport", mock.Anything).Return(nil)
 				tenableMock.On("WaitForExport", mock.Anything).Return(nil)
 				tenableMock.On("DownloadExport", mock.Anything).Return(nil)
+				ec2Mock.On("UploadFile", mock.Anything).Return(nil)
 			},
 			shouldError: false,
 		},
