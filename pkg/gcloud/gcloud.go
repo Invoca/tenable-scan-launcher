@@ -157,3 +157,7 @@ func (g *GCloudWrapper) InstancesIPsInRegion(region string) ([]string, error) {
 	}
 	return privateIps, nil
 }
+
+func (g *GCloud) UploadFile(key string, objectName string, data []byte) error {
+	return fmt.Errorf("UploadFile: Not implemented yet")
+}

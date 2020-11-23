@@ -328,13 +328,6 @@ func (t *Tenable) WaitForScanToComplete() error {
 	}
 }
 
-/*
-# https://cloud.tenable.com/scans/111/latest-status
-# {"status":"pending"}
-# {"status":"running"}
-# {"status":"completed"}
-*/
-
 func (t *Tenable) checkScanProgess() (string, error) {
 	fmt.Println("Checking progress of the scan")
 

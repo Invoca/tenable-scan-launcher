@@ -32,3 +32,8 @@ func (g *GCloudMock) InstancesIPsInRegion(region string) ([]string, error) {
 		return args.Get(0).([]string), args.Error(1)
 	}
 }
+
+func (g *GCloudMock) UploadFile(s3Key string, bucketName string, data []byte) error {
+	args := g.Called()
+	return args.Error(0)
+}
