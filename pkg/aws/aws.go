@@ -15,7 +15,6 @@ import (
 type AwsSvc struct {
 	IPs    []string
 	Ec2svc ec2iface.EC2API
-	//s3Manager *s3manager.Uploader
 	s3Manager s3Wrapper
 }
 
