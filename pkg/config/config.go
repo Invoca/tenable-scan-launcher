@@ -20,7 +20,11 @@ type TenableConfig struct {
 type GCloudConfig struct {
 	ServiceAccountPath string
 	ProjectName        string
-	Concurrency		   int
+	Concurrency        int
+}
+
+type SlackConfig struct {
+	SlackURL string
 }
 
 type BaseConfig struct {
@@ -29,4 +33,5 @@ type BaseConfig struct {
 	HighSeverity  bool
 	TenableConfig *TenableConfig
 	GCloudConfig  *GCloudConfig
+	SlackConfig   *SlackConfig
 }

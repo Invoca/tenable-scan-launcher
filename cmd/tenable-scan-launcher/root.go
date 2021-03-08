@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	"github.com/Invoca/tenable-scan-launcher/pkg/runner"
 	log "github.com/sirupsen/logrus"
@@ -49,6 +50,8 @@ import (
     --summary-report(vuln_hosts_summary)
 	--report-file-location
 
+	--slack-url
+
 */
 
 type logConfig struct {
@@ -60,9 +63,11 @@ func NewRootCmd() *cobra.Command {
 	baseConfig := config.BaseConfig{}
 	tenableConfig := config.TenableConfig{}
 	gcloudConfig := config.GCloudConfig{}
+	slackConfig := config.SlackConfig{}
 
 	baseConfig.TenableConfig = &tenableConfig
 	baseConfig.GCloudConfig = &gcloudConfig
+	baseConfig.SlackConfig = &slackConfig
 
 	logConfig := logConfig{}
 
@@ -116,6 +121,8 @@ instances given based on the scanner id. It is also able to export the scans and
 	f.BoolVarP(&baseConfig.TenableConfig.SummaryReport, "summary-report", "S", false, "Generate A report in summary format")
 	f.BoolVarP(&baseConfig.TenableConfig.FullReport, "full-report", "F", false, "Generate A report with all chapters")
 	f.StringVarP(&baseConfig.TenableConfig.FilePath, "report-file-location", "", "", "File Location of the report")
+
+	f.StringVarP(&baseConfig.SlackConfig.SlackURL, "slack-url", "u", "", "Slack URL to post messages to")
 
 	return cmd
 }

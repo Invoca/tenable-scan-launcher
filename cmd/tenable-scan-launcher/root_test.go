@@ -1,11 +1,12 @@
 package main
 
 import (
+	"strconv"
+	"testing"
+
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"strconv"
-	"testing"
 )
 
 type setupRunnerTestCast struct {
@@ -37,6 +38,7 @@ func TestSetupBaseConfig(t *testing.T) {
 		"filter-search-type",
 		"report-format",
 		"report-file-location",
+		"u",
 	}
 
 	newCmd := NewRootCmd()
