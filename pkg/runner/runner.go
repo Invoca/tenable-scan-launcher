@@ -98,7 +98,7 @@ func (r *Runner) Run() error {
 	if err != nil {
 		return fmt.Errorf("Run: Error Fetching alerts from Tenable Dashboard %s", err)
 	}
-	if alerts.TotalVulnerabilityCount > 1 {
+	if alerts.TotalVulnerabilityCount > 0 {
 		log.Debug("Posting to Slack")
 		err = r.slackSvc.PrintAlerts(*alerts)
 		if err != nil {
