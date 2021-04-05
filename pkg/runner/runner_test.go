@@ -172,8 +172,6 @@ func TestRun(t *testing.T) {
 		{
 			desc: "Tenable is not able to get list of vulnerabilites from Tenable dashboard",
 			setup: func() {
-
-				//TODO: Create Test cases with Max
 				ec2Mock.Reset()
 				gcloudMock.Reset()
 				tenableMock.Reset()

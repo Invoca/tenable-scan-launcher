@@ -170,5 +170,4 @@ func (r *Runner) getIPs() error {
 
 	log.Debug("\n\nALL:", ips)
 	return nil
-
 }

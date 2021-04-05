@@ -151,10 +151,6 @@ func (s *slack) PrintAlerts(alerts tenable.Alerts) error {
 		v.PluginName = strings.ReplaceAll(v.PluginName, ">", " ")
 		title := ":red_circle: " + "*" + strconv.FormatUint(uint64(v.Count), 10) + "*" + " instance(s) currently contain(s) the `" + v.VulnerabilityState + "` vulnerability: \n"
 		attachmentText := "<https://www.tenable.com/plugins/nessus/" + strconv.FormatUint(uint64(v.PluginID), 10) + "|" + v.PluginName + ">\n"
-		//		attachmentText = attachmentText + "*Plugin Family:* " + v.PluginFamily + "\n"
-		//		attachmentText = attachmentText + "*Vulnerability Priority Rating:* " + strconv.FormatUint(uint64(v.VprScore), 10) + "\n"
-		//attachmentText = attachmentText + "*Link to Vulnerability:* https://www.tenable.com/plugins/nessus/" + strconv.FormatUint(uint64(v.PluginID), 10)
-
 		err := s.createBlockSlackPost(title, attachmentText)
 		if err != nil {
 			return fmt.Errorf("PrintAlerts: Error posting message to slack %s", err)

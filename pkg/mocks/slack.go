@@ -13,8 +13,8 @@ type SlackInterfaceMock struct {
 func (s *SlackInterfaceMock) PrintAlerts(alerts tenable.Alerts) error {
 	fmt.Println("Slack Mock")
 	args := s.Called()
-	x := args.Error(0)
-	fmt.Println(x)
-	return x
+	err := args.Error(0)
+	fmt.Println(err)
+	return err
 
 }
