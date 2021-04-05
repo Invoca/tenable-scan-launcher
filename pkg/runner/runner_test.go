@@ -2,12 +2,14 @@ package runner
 
 import (
 	"fmt"
+	"strconv"
+	"testing"
+
 	"github.com/Invoca/tenable-scan-launcher/pkg/mocks"
+	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"strconv"
-	"testing"
 )
 
 type testCase struct {
@@ -32,10 +34,20 @@ func TestRun(t *testing.T) {
 
 	tenableMock := &mocks.MockTenableAPI{}
 
+	slackMock := mocks.SlackInterfaceMock{}
+
+	alerts := tenable.Alerts{
+
+		Vulnerabilities:         []tenable.Vulnerabilities{},
+		TotalVulnerabilityCount: 1,
+		TotalAssetCount:         1,
+	}
+
 	runner := Runner{
 		ec2Svc:         ec2Mock,
 		gcloud:         gcloudMock,
 		tenable:        tenableMock,
+		slackSvc:       &slackMock,
 		includeGCloud:  true,
 		includeAWS:     true,
 		generateReport: true,
@@ -48,6 +60,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
 				tenableMock.Reset()
+				slackMock.Reset()
 
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
@@ -55,6 +68,8 @@ func TestRun(t *testing.T) {
 				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
 				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
 
+				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
+				slackMock.On("PrintAlerts", mock.Anything).Return(nil)
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
 				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
@@ -70,6 +85,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
 				tenableMock.Reset()
+				slackMock.Reset()
 
 				ec2Mock.IPs = nil
 				gcloudMock.IPs = gcloudInstances
@@ -85,6 +101,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
 				tenableMock.Reset()
+				slackMock.Reset()
 
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = nil
@@ -100,6 +117,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
 				tenableMock.Reset()
+				slackMock.Reset()
 
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
@@ -117,6 +135,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
 				tenableMock.Reset()
+				slackMock.Reset()
 
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
@@ -129,12 +148,14 @@ func TestRun(t *testing.T) {
 			},
 			shouldError: true,
 		},
+
 		{
 			desc: "Tenable is not able to WaitForScanToComplete",
 			setup: func() {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
 				tenableMock.Reset()
+				slackMock.Reset()
 
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
@@ -149,11 +170,12 @@ func TestRun(t *testing.T) {
 			shouldError: true,
 		},
 		{
-			desc: "Tenable is not able to StartExport",
+			desc: "Tenable is not able to get list of vulnerabilites from Tenable dashboard",
 			setup: func() {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
 				tenableMock.Reset()
+				slackMock.Reset()
 
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
@@ -164,6 +186,53 @@ func TestRun(t *testing.T) {
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
 				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, fmt.Errorf("Error getting Vulnerabilities from Dashboard"))
+
+			},
+			shouldError: true,
+		},
+		{
+			desc: "Alerts are not able to be posted to slack",
+			setup: func() {
+				ec2Mock.Reset()
+				gcloudMock.Reset()
+				tenableMock.Reset()
+				slackMock.Reset()
+
+				ec2Mock.IPs = awsInstances
+				gcloudMock.IPs = gcloudInstances
+
+				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
+				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
+
+				tenableMock.On("SetTargets", mock.Anything).Return(nil)
+				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
+				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
+				slackMock.On("PrintAlerts", mock.Anything).Return(fmt.Errorf("Error"))
+
+			},
+			shouldError: true,
+		},
+		{
+			desc: "Tenable is not able to StartExport",
+			setup: func() {
+				ec2Mock.Reset()
+				gcloudMock.Reset()
+				tenableMock.Reset()
+				slackMock.Reset()
+
+				ec2Mock.IPs = awsInstances
+				gcloudMock.IPs = gcloudInstances
+
+				ec2Mock.On("GatherIPs", mock.Anything).Return(awsInstances, nil)
+				gcloudMock.On("GatherIPs", mock.Anything).Return(gcloudInstances, nil)
+
+				tenableMock.On("SetTargets", mock.Anything).Return(nil)
+				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
+				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
+				slackMock.On("PrintAlerts", mock.Anything).Return(nil)
 				tenableMock.On("StartExport", mock.Anything).Return(fmt.Errorf("Error!"))
 			},
 			shouldError: true,
@@ -174,6 +243,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
 				tenableMock.Reset()
+				slackMock.Reset()
 
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
@@ -184,6 +254,8 @@ func TestRun(t *testing.T) {
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
 				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
+				slackMock.On("PrintAlerts", mock.Anything).Return(nil)
 				tenableMock.On("StartExport", mock.Anything).Return(nil)
 				tenableMock.On("WaitForExport", mock.Anything).Return(fmt.Errorf("Error!"))
 			},
@@ -195,6 +267,7 @@ func TestRun(t *testing.T) {
 				ec2Mock.Reset()
 				gcloudMock.Reset()
 				tenableMock.Reset()
+				slackMock.Reset()
 
 				ec2Mock.IPs = awsInstances
 				gcloudMock.IPs = gcloudInstances
@@ -205,6 +278,8 @@ func TestRun(t *testing.T) {
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
 				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
+				slackMock.On("PrintAlerts", mock.Anything).Return(nil)
 				tenableMock.On("StartExport", mock.Anything).Return(nil)
 				tenableMock.On("WaitForExport", mock.Anything).Return(nil)
 				tenableMock.On("DownloadExport", mock.Anything).Return(fmt.Errorf("Error!"))

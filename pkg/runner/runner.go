@@ -2,17 +2,21 @@ package runner
 
 import (
 	"fmt"
+
 	"github.com/Invoca/tenable-scan-launcher/pkg/aws"
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	"github.com/Invoca/tenable-scan-launcher/pkg/gcloud"
+	"github.com/Invoca/tenable-scan-launcher/pkg/slack"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
+
 	log "github.com/sirupsen/logrus"
 )
 
 type Runner struct {
 	ec2Svc         wrapper.CloudWrapper
 	gcloud         wrapper.CloudWrapper
+	slackSvc       wrapper.SlackSvc
 	tenable        wrapper.Tenable
 	includeGCloud  bool
 	includeAWS     bool
@@ -21,12 +25,18 @@ type Runner struct {
 
 func (r *Runner) SetupRunner(config *config.BaseConfig) error {
 
+	var err error
 	r.includeAWS = config.IncludeAWS
 	r.includeGCloud = config.IncludeGCloud
 
 	if config.TenableConfig == nil {
 		return fmt.Errorf("SetupRunner: TenableConfig in config cannot be nil")
 	}
+
+	if config.SlackConfig == nil {
+		return fmt.Errorf("SetupRunner: SlackConfig in config cannot be nil ")
+	}
+	r.slackSvc, err = slack.New(*config)
 
 	if r.includeAWS {
 		ec2Svc := &aws.AWSEc2{}
@@ -60,6 +70,7 @@ func (r *Runner) SetupRunner(config *config.BaseConfig) error {
 
 func (r *Runner) Run() error {
 	log.Debug("Run")
+
 	err := r.getIPs()
 	if err != nil {
 		return fmt.Errorf("Run: Error getting ips %s", err)
@@ -80,6 +91,20 @@ func (r *Runner) Run() error {
 	}
 
 	log.Debug("Scan complete.")
+
+	log.Debug("Fetching Critical alerts from Tenable Dashboard")
+	alerts, err := r.tenable.GetVulnerabilities()
+
+	if err != nil {
+		return fmt.Errorf("Run: Error Fetching alerts from Tenable Dashboard %s", err)
+	}
+	if alerts.TotalVulnerabilityCount > 0 {
+		log.Debug("Posting to Slack")
+		err = r.slackSvc.PrintAlerts(*alerts)
+		if err != nil {
+			return fmt.Errorf("Run: Error posting to slack %s", err)
+		}
+	}
 
 	if r.generateReport {
 		err = r.tenable.StartExport()

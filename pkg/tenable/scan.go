@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/Invoca/tenable-scan-launcher/pkg/config"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/afero"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/Invoca/tenable-scan-launcher/pkg/config"
+	log "github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 )
 
 type Filter struct {
@@ -516,5 +517,52 @@ func (t *Tenable) DownloadExport() error {
 	log.Debug("Report written to file")
 
 	return nil
+}
 
+type Vulnerabilities struct {
+	Count              int                `json:"count"`
+	PluginFamily       string             `json:"plugin_family"`
+	PluginID           int                `json:"plugin_id"`
+	PluginName         string             `json:"plugin_name"`
+	VulnerabilityState string             `json:"vulnerability_state"`
+	VprState           string             `json:"vpr_state"`
+	VprScore           float32            `json:"vpr_score"`
+	AcceptedCount      int                `json:"accepted_count"`
+	RecastedCount      int                `json:"recasted_count"`
+	CountsBySeverity   []CountsBySeverity `json:"counts_by_severity"`
+}
+type CountsBySeverity struct {
+	Count int `json:"count"`
+	Value int `json:"value"`
+}
+type Alerts struct {
+	Vulnerabilities         []Vulnerabilities `json:"vulnerabilities"`
+	TotalVulnerabilityCount int               `json:"total_vulnerability_count"`
+	TotalAssetCount         int               `json:"total_asset_count"`
+}
+
+func (t *Tenable) GetVulnerabilities() (*Alerts, error) {
+	url := "https://cloud.tenable.com/workbenches/vulnerabilities"
+
+	req, _ := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("Accept", "application/json")
+	req.Header.Add("X-ApiKeys", "accessKey="+t.accessKey+"; secretKey="+t.secretKey+";")
+
+	res, _ := http.DefaultClient.Do(req)
+
+	defer res.Body.Close()
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("Error pulling vulnerabilities from Tenable %s", err)
+	}
+	alerts := Alerts{}
+	err = json.Unmarshal([]byte(body), &alerts)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error Unmarshalling Json to Alerts object %s", err)
+	}
+	fmt.Println(alerts.TotalAssetCount)
+	fmt.Println(alerts.TotalVulnerabilityCount)
+	return &alerts, nil
 }
