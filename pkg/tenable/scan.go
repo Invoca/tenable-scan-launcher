@@ -254,6 +254,14 @@ func (t *Tenable) tenableRequest(url string, method string, headers map[string]s
 		return nil, fmt.Errorf("checkScanProgess: Recieved a response code that is not 200. Recieved: %d", res.StatusCode)
 	}
 
+	if res.StatusCode == 502 {
+		continue
+	}
+
+	if res.StatusCode == 409 {
+		continue
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("checkScanProgess: Error reading body. %s", err)
 	}
@@ -301,6 +309,7 @@ func (t *Tenable) LaunchScan() error {
 	return nil
 }
 
+/*
 func (t *Tenable) WaitForScanToComplete() error {
 	fmt.Println("Waiting for scan to complete")
 
@@ -328,6 +337,7 @@ func (t *Tenable) WaitForScanToComplete() error {
 		time.Sleep(5)
 	}
 }
+*/
 
 /*
 # https://cloud.tenable.com/scans/111/latest-status
@@ -336,6 +346,7 @@ func (t *Tenable) WaitForScanToComplete() error {
 # {"status":"completed"}
 */
 
+/*
 func (t *Tenable) checkScanProgess() (string, error) {
 	fmt.Println("Checking progress of the scan")
 
@@ -359,6 +370,7 @@ func (t *Tenable) checkScanProgess() (string, error) {
 	status := data["status"].(string)
 	return status, nil
 }
+*/
 
 func (t *Tenable) StartExport() error {
 	if t.generateReport == false {
