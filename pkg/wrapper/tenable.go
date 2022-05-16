@@ -7,9 +7,9 @@ import (
 type Tenable interface {
 	SetTargets([]string) error
 	LaunchScan() error
-	WaitForScanToComplete() error
-	StartExport() error
-	WaitForExport() error
-	DownloadExport() error
+//	WaitForScanToComplete() error
+//	StartExport() error
+//	WaitForExport() error
+//	DownloadExport() error
 	GetVulnerabilities() (*t.Alerts, error)
 }

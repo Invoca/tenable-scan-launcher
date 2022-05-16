@@ -72,10 +72,10 @@ func TestRun(t *testing.T) {
 				slackMock.On("PrintAlerts", mock.Anything).Return(nil)
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
-				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
-				tenableMock.On("StartExport", mock.Anything).Return(nil)
-				tenableMock.On("WaitForExport", mock.Anything).Return(nil)
-				tenableMock.On("DownloadExport", mock.Anything).Return(nil)
+		// tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+		//		tenableMock.On("StartExport", mock.Anything).Return(nil)
+		//		tenableMock.On("WaitForExport", mock.Anything).Return(nil)
+		//		tenableMock.On("DownloadExport", mock.Anything).Return(nil)
 			},
 			shouldError: false,
 		},
@@ -165,7 +165,7 @@ func TestRun(t *testing.T) {
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
-				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(fmt.Errorf("Tenable Error"))
+	//			tenableMock.On("WaitForScanToComplete", mock.Anything).Return(fmt.Errorf("Tenable Error"))
 			},
 			shouldError: true,
 		},
@@ -185,8 +185,8 @@ func TestRun(t *testing.T) {
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
-				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
-				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, fmt.Errorf("Error getting Vulnerabilities from Dashboard"))
+		//		tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+		//		tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, fmt.Errorf("Error getting Vulnerabilities from Dashboard"))
 
 			},
 			shouldError: true,
@@ -207,9 +207,9 @@ func TestRun(t *testing.T) {
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
-				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
-				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
-				slackMock.On("PrintAlerts", mock.Anything).Return(fmt.Errorf("Error"))
+		//		tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+		//		tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
+		//		slackMock.On("PrintAlerts", mock.Anything).Return(fmt.Errorf("Error"))
 
 			},
 			shouldError: true,
@@ -230,10 +230,10 @@ func TestRun(t *testing.T) {
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
-				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
-				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
-				slackMock.On("PrintAlerts", mock.Anything).Return(nil)
-				tenableMock.On("StartExport", mock.Anything).Return(fmt.Errorf("Error!"))
+			//	tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+		 //		tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
+		//	slackMock.On("PrintAlerts", mock.Anything).Return(nil)
+		//	tenableMock.On("StartExport", mock.Anything).Return(fmt.Errorf("Error!"))
 			},
 			shouldError: true,
 		},
@@ -253,11 +253,11 @@ func TestRun(t *testing.T) {
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
-				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
-				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
-				slackMock.On("PrintAlerts", mock.Anything).Return(nil)
-				tenableMock.On("StartExport", mock.Anything).Return(nil)
-				tenableMock.On("WaitForExport", mock.Anything).Return(fmt.Errorf("Error!"))
+		//		tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+		//		tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
+		//		slackMock.On("PrintAlerts", mock.Anything).Return(nil)
+		//		tenableMock.On("StartExport", mock.Anything).Return(nil)
+		//		tenableMock.On("WaitForExport", mock.Anything).Return(fmt.Errorf("Error!"))
 			},
 			shouldError: true,
 		},
@@ -277,12 +277,12 @@ func TestRun(t *testing.T) {
 
 				tenableMock.On("SetTargets", mock.Anything).Return(nil)
 				tenableMock.On("LaunchScan", mock.Anything).Return(nil)
-				tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
-				tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
-				slackMock.On("PrintAlerts", mock.Anything).Return(nil)
-				tenableMock.On("StartExport", mock.Anything).Return(nil)
-				tenableMock.On("WaitForExport", mock.Anything).Return(nil)
-				tenableMock.On("DownloadExport", mock.Anything).Return(fmt.Errorf("Error!"))
+			//	tenableMock.On("WaitForScanToComplete", mock.Anything).Return(nil)
+			//	tenableMock.On("GetVulnerabilities", mock.Anything).Return(&alerts, nil)
+			//	slackMock.On("PrintAlerts", mock.Anything).Return(nil)
+			//	tenableMock.On("StartExport", mock.Anything).Return(nil)
+			//	tenableMock.On("WaitForExport", mock.Anything).Return(nil)
+			//	tenableMock.On("DownloadExport", mock.Anything).Return(fmt.Errorf("Error!"))
 			},
 			shouldError: true,
 		},

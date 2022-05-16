@@ -85,6 +85,7 @@ func (r *Runner) Run() error {
 
 	log.Debug("Scan launched. Waiting for scan to complete.")
 
+	/**
 	err = r.tenable.WaitForScanToComplete()
 	if err != nil {
 		return fmt.Errorf("Run: Error Waiting For Scan To Complete %s", err)
@@ -127,8 +128,9 @@ func (r *Runner) Run() error {
 		}
 		log.Debug("File successfully downloaded")
 	}
-
+	**/
 	log.Debug("Run Finished")
+
 	return nil
 }
 
