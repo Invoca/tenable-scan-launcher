@@ -2,8 +2,7 @@ package mocks
 
 import (
 	"fmt"
-
-	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
+//	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 	t "github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 )
 
