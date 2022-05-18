@@ -84,50 +84,50 @@ func (r *Runner) Run() error {
 	}
 
 	log.Debug("Scan launched. Waiting for scan to complete.")
-
-	err = r.tenable.WaitForScanToComplete()
-	if err != nil {
-		return fmt.Errorf("Run: Error Waiting For Scan To Complete %s", err)
-	}
-
-	log.Debug("Scan complete.")
-
-	log.Debug("Fetching Critical alerts from Tenable Dashboard")
-	alerts, err := r.tenable.GetVulnerabilities()
-
-	if err != nil {
-		return fmt.Errorf("Run: Error Fetching alerts from Tenable Dashboard %s", err)
-	}
-	if alerts.TotalVulnerabilityCount > 0 {
-		log.Debug("Posting to Slack")
-		err = r.slackSvc.PrintAlerts(*alerts)
+	/**
+		err = r.tenable.WaitForScanToComplete()
 		if err != nil {
-			return fmt.Errorf("Run: Error posting to slack %s", err)
-		}
-	}
-
-	if r.generateReport {
-		err = r.tenable.StartExport()
-		if err != nil {
-			return fmt.Errorf("Run: Error Starting Scan %s", err)
+			return fmt.Errorf("Run: Error Waiting For Scan To Complete %s", err)
 		}
 
-		log.Debug("Export Started. Waiting for file to be ready.")
+		log.Debug("Scan complete.")
 
-		err = r.tenable.WaitForExport()
+		log.Debug("Fetching Critical alerts from Tenable Dashboard")
+		alerts, err := r.tenable.GetVulnerabilities()
+
 		if err != nil {
-			return fmt.Errorf("Run: Error Waiting For Export %s", err)
+			return fmt.Errorf("Run: Error Fetching alerts from Tenable Dashboard %s", err)
+		}
+		if alerts.TotalVulnerabilityCount > 0 {
+			log.Debug("Posting to Slack")
+			err = r.slackSvc.PrintAlerts(*alerts)
+			if err != nil {
+				return fmt.Errorf("Run: Error posting to slack %s", err)
+			}
 		}
 
-		log.Debug("Starting file download")
+		if r.generateReport {
+			err = r.tenable.StartExport()
+			if err != nil {
+				return fmt.Errorf("Run: Error Starting Scan %s", err)
+			}
 
-		err = r.tenable.DownloadExport()
-		if err != nil {
-			return fmt.Errorf("Run: Error Downloading Export %s", err)
+			log.Debug("Export Started. Waiting for file to be ready.")
+
+			err = r.tenable.WaitForExport()
+			if err != nil {
+				return fmt.Errorf("Run: Error Waiting For Export %s", err)
+			}
+
+			log.Debug("Starting file download")
+
+			err = r.tenable.DownloadExport()
+			if err != nil {
+				return fmt.Errorf("Run: Error Downloading Export %s", err)
+			}
+			log.Debug("File successfully downloaded")
 		}
-		log.Debug("File successfully downloaded")
-	}
-
+	**/
 	log.Debug("Run Finished")
 	return nil
 }
