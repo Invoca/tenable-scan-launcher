@@ -550,7 +550,11 @@ func (t *Tenable) GetVulnerabilities() (*Alerts, error) {
 	req.Header.Add("X-ApiKeys", "accessKey="+t.accessKey+"; secretKey="+t.secretKey+";")
 
 	res, _ := http.DefaultClient.Do(req)
-
+	res, err := http.Get(url)
+	if err != nil {
+		// process error
+		return nil, fmt.Errorf("Couldn't retrieve endpoint: " + err.Error())
+	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
