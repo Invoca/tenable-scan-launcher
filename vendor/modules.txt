@@ -128,6 +128,9 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
+# golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
+## explicit
+golang.org/x/time/rate
 # google.golang.org/api v0.13.0
 ## explicit
 google.golang.org/api/compute/v1
