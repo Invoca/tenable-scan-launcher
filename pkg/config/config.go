@@ -23,9 +23,9 @@ type GCloudConfig struct {
 	Concurrency        int
 }
 
-type SlackConfig struct {
-	SlackURL string
-}
+//type SlackConfig struct {
+//	SlackURL string
+//}
 
 type BaseConfig struct {
 	IncludeAWS    bool
@@ -33,5 +33,5 @@ type BaseConfig struct {
 	HighSeverity  bool
 	TenableConfig *TenableConfig
 	GCloudConfig  *GCloudConfig
-	SlackConfig   *SlackConfig
+	//SlackConfig   *SlackConfig
 }

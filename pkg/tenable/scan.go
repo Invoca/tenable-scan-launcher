@@ -544,13 +544,16 @@ type Alerts struct {
 func (t *Tenable) GetVulnerabilities() (*Alerts, error) {
 	url := "https://cloud.tenable.com/workbenches/vulnerabilities"
 
+	// TODO This should just use tenableRequest()
 	req, _ := http.NewRequest("GET", url, nil)
 
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("X-ApiKeys", "accessKey="+t.accessKey+"; secretKey="+t.secretKey+";")
 
-	res, _ := http.DefaultClient.Do(req)
-
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("GetVulnerabilities: Error performing request. %s", err)
+	}
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {

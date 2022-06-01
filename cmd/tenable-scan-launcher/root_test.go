@@ -38,7 +38,7 @@ func TestSetupBaseConfig(t *testing.T) {
 		"filter-search-type",
 		"report-format",
 		"report-file-location",
-		"u",
+		//"u",
 	}
 
 	newCmd := NewRootCmd()
@@ -99,7 +99,7 @@ func TestSetupLogging(t *testing.T) {
 		}
 
 		if log.GetLevel() != logPair.expectedLoglevel {
-			t.Errorf("Error! Log level not expected. Got " + string(log.GetLevel()) + " Expected: " + string(logPair.expectedLoglevel))
+			t.Errorf("Error! Log level not expected. Got " + log.GetLevel().String() + " Expected: " + logPair.expectedLoglevel.String())
 		}
 	}
 }

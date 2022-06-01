@@ -8,9 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 
 	log "github.com/sirupsen/logrus"
@@ -58,24 +56,24 @@ func (c *rateLimitedHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	return resp, nil
 }
 
-func New(config config.BaseConfig) (*slack, error) {
-	if config.SlackConfig == nil {
-		return nil, fmt.Errorf("Error: SlackConfig cannot be nil")
-	}
+//func New(config config.BaseConfig) (*slack, error) {
+//if config.SlackConfig == nil {
+//	return nil, fmt.Errorf("Error: SlackConfig cannot be nil")
+//}
 
-	if config.SlackConfig.SlackURL == "" {
-		return nil, fmt.Errorf("Error: SlackURL cannot be empty")
-	}
+//if config.SlackConfig.SlackURL == "" {
+//	return nil, fmt.Errorf("Error: SlackURL cannot be empty")
+//}
 
-	s := slack{}
-	s.slackUrl = config.SlackConfig.SlackURL
-	s.rateLimit = &rateLimitedHTTPClient{
-		client:   http.DefaultClient,
-		rlClient: rate.NewLimiter(rate.Every(10*time.Second), 10),
-	}
+//s := slack{}
+//s.slackUrl = config.SlackConfig.SlackURL
+//s.rateLimit = &rateLimitedHTTPClient{
+//	client:   http.DefaultClient,
+//	rlClient: rate.NewLimiter(rate.Every(10*time.Second), 10),
+//}
 
-	return &s, nil
-}
+//return &s, nil
+//}
 
 func (s *slack) createBlockSlackPost(text string, additionalText string) error {
 	var blockSlice []block

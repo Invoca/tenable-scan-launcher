@@ -1,4 +1,5 @@
 # cloud.google.com/go v0.46.3
+## explicit
 cloud.google.com/go/compute/metadata
 # github.com/aws/aws-sdk-go v1.33.6
 ## explicit
@@ -42,20 +43,19 @@ github.com/aws/aws-sdk-go/service/sts
 github.com/aws/aws-sdk-go/service/sts/stsiface
 # github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
-# github.com/golang/mock v1.4.3
-## explicit
 # github.com/golang/protobuf v1.3.4
+## explicit
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+# github.com/google/go-cmp v0.3.1
+## explicit
 # github.com/googleapis/gax-go/v2 v2.0.5
 github.com/googleapis/gax-go/v2
 # github.com/hashicorp/golang-lru v0.5.1
 github.com/hashicorp/golang-lru/simplelru
-# github.com/hashicorp/terraform v0.12.28
-## explicit
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
 # github.com/jmespath/go-jmespath v0.3.0
@@ -76,8 +76,6 @@ github.com/spf13/afero/mem
 github.com/spf13/cobra
 # github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
-# github.com/spf13/viper v1.7.0
-## explicit
 # github.com/stretchr/objx v0.1.1
 github.com/stretchr/objx
 # github.com/stretchr/testify v1.5.1
@@ -101,9 +99,8 @@ go.opencensus.io/trace
 go.opencensus.io/trace/internal
 go.opencensus.io/trace/propagation
 go.opencensus.io/trace/tracestate
-# golang.org/dl v0.0.0-20200724191219-e4fbcf8a7a81
-## explicit
 # golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
+## explicit
 golang.org/x/crypto/ssh/terminal
 # golang.org/x/net v0.0.0-20200202094626-16171245cfb2
 golang.org/x/net/context
@@ -121,6 +118,7 @@ golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
 # golang.org/x/sys v0.0.0-20190804053845-51ab0e2deafa
+## explicit
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.2
@@ -128,6 +126,9 @@ golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
+# golang.org/x/time v0.0.0-20190308202827-9d24e82272b4
+## explicit
+golang.org/x/time/rate
 # google.golang.org/api v0.13.0
 ## explicit
 google.golang.org/api/compute/v1
@@ -151,8 +152,10 @@ google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
 # google.golang.org/genproto v0.0.0-20191108220845-16a3f7862a1a
+## explicit
 google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.27.1
+## explicit
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
@@ -190,4 +193,5 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
 # gopkg.in/yaml.v2 v2.2.4
+## explicit
 gopkg.in/yaml.v2

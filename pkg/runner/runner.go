@@ -6,7 +6,6 @@ import (
 	"github.com/Invoca/tenable-scan-launcher/pkg/aws"
 	"github.com/Invoca/tenable-scan-launcher/pkg/config"
 	"github.com/Invoca/tenable-scan-launcher/pkg/gcloud"
-	"github.com/Invoca/tenable-scan-launcher/pkg/slack"
 	"github.com/Invoca/tenable-scan-launcher/pkg/tenable"
 	"github.com/Invoca/tenable-scan-launcher/pkg/wrapper"
 
@@ -33,10 +32,10 @@ func (r *Runner) SetupRunner(config *config.BaseConfig) error {
 		return fmt.Errorf("SetupRunner: TenableConfig in config cannot be nil")
 	}
 
-	if config.SlackConfig == nil {
-		return fmt.Errorf("SetupRunner: SlackConfig in config cannot be nil ")
-	}
-	r.slackSvc, err = slack.New(*config)
+	//if config.SlackConfig == nil {
+	//	return fmt.Errorf("SetupRunner: SlackConfig in config cannot be nil ")
+	//}
+	//r.slackSvc, err = slack.New(*config)
 
 	if r.includeAWS {
 		ec2Svc := &aws.AWSEc2{}
@@ -85,6 +84,7 @@ func (r *Runner) Run() error {
 
 	log.Debug("Scan launched. Waiting for scan to complete.")
 
+	/**
 	err = r.tenable.WaitForScanToComplete()
 	if err != nil {
 		return fmt.Errorf("Run: Error Waiting For Scan To Complete %s", err)
@@ -127,8 +127,9 @@ func (r *Runner) Run() error {
 		}
 		log.Debug("File successfully downloaded")
 	}
-
+	**/
 	log.Debug("Run Finished")
+
 	return nil
 }
 
