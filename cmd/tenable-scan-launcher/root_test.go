@@ -99,7 +99,7 @@ func TestSetupLogging(t *testing.T) {
 		}
 
 		if log.GetLevel() != logPair.expectedLoglevel {
-			t.Errorf("Error! Log level not expected. Got " + string(rune(log.GetLevel())) + " Expected: " + string(rune(logPair.expectedLoglevel)))
+			t.Errorf("Error! Log level not expected. Got " + log.GetLevel().String() + " Expected: " + logPair.expectedLoglevel.String())
 		}
 	}
 }
