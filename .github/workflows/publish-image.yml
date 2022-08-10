@@ -7,16 +7,8 @@ on:
       - '*'
   pull_request:
 
-  # wait for Golang tests
-  workflow_run:
-    workflows: ["Golang"]
-    types:
-      - completed
-
 jobs:
   build:
-    # do not build and push if tests failed
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Build & Push
     runs-on: ubuntu-20.04
     steps:
