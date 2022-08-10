@@ -1,0 +1,31 @@
+name: Golang
+on:
+  push:
+    branches:
+      - master
+      - main
+  pull_request:
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go:
+          - 1.14
+          - 1.15
+          - 1.16
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup ${{ matrix.go }}
+        uses: actions/setup-go@v3
+        with:
+          go-version: ${{ matrix.go }}
+      - name: Format
+        run: go fmt ./...
+      - name: Vet
+        run: go vet ./...
+      - name: Test
+        run: go test -v ./...
