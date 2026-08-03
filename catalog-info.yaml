@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: tenable-scan-launcher
+  description: Launches Tenable vulnerability scans against private IPs collected from AWS and Google Cloud instances.
+spec:
+  type: tool
+  lifecycle: production
+  owner: group:default/security-and-compliance-infosec
+  system: security-scanning
